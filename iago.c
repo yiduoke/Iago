@@ -23,20 +23,20 @@ int current_x = 0;
 int current_y = 0;
 
 //sets board[][] to all spaces, then adds initial pieces
-// void initialize(){
-//   int y;
-//   int x;
-//   for(y = 0; y < 8; y++){
-//     for(x = 0; x < 8; x++){
-//       board[y][x] = ' ';
-//     }
-//   }
+void initialize(){
+  int y;
+  int x;
+  for(y = 0; y < 8; y++){
+    for(x = 0; x < 8; x++){
+      board[y][x] = ' ';
+    }
+  }
 
-//   board[3][3] = 'w';
-//   board[3][4] = 'b';
-//   board[4][3] = 'b';
-//   board[4][4] = 'w';
-// }
+  board[3][3] = 'w';
+  board[3][4] = 'b';
+  board[4][3] = 'b';
+  board[4][4] = 'w';
+}
 
 //prints empty board
 void print_board(){
@@ -109,7 +109,6 @@ void move(){
     char buffer[BUFFER_SIZE];
   
     from_server = client_handshake( &to_server );
-    printf("downstream: %d\n", from_server);
     
     while(1){
         n = getchar();
@@ -159,7 +158,7 @@ static void sighandler(int signo) {
 
 int main(){
     signal(SIGINT, sighandler);
-
+    initialize();
     clear();
     gotoxy(0,0);
     print_board();
