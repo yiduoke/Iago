@@ -147,5 +147,6 @@ int main(){
     clear();
     gotoxy(0,0);
     print_board();
+    update_board();
     move();
 }
