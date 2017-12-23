@@ -129,12 +129,14 @@ void move(){
             }
 	    else if(key == SPACE){
         //   place_piece(current_x, current_y, 'b');
-        char placed_piece[3];
-        placed_piece[0] = current_x;
-        placed_piece[1] = current_y;
-        placed_piece[2] = 'b'; // let's make it black for now
+            char placed_piece[3];
+            placed_piece[0] = current_x;
+            placed_piece[1] = current_y;
+            placed_piece[2] = 'b'; // let's make it black for now
 
-        write(to_server, placed_piece, sizeof(placed_piece));
+            write(to_server, placed_piece, sizeof(placed_piece));
+            read(from_server, buffer, sizeof(buffer));
+            printf("received: [%s]\n", buffer);
 
 	      update_board();
             }
