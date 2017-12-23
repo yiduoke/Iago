@@ -9,6 +9,7 @@
 #include <sys/sem.h>
 #include <sys/shm.h>
 #include <errno.h>
+#include <termios.h>
 
 #define clear() printf("\033[2J");
 #define hide_cursor() printf("\033[?25l");
