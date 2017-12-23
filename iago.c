@@ -20,20 +20,20 @@ struct termios initial_settings,
 new_settings;
 
 //sets board[][] to all spaces, then adds initial pieces
-// void initialize(){
-//   int y;
-//   int x;
-//   for(y = 0; y < 8; y++){
-//     for(x = 0; x < 8; x++){
-//       board[y][x] = ' ';
-//     }
-//   }
+void initialize(){
+  int y;
+  int x;
+  for(y = 0; y < 8; y++){
+    for(x = 0; x < 8; x++){
+      board[y][x] = ' ';
+    }
+  }
 
-//   board[3][3] = 'w';
-//   board[3][4] = 'b';
-//   board[4][3] = 'b';
-//   board[4][4] = 'w';
-// }
+  board[3][3] = 'w';
+  board[3][4] = 'b';
+  board[4][3] = 'b';
+  board[4][4] = 'w';
+}
 
 //prints empty board
 void print_board(){
@@ -123,15 +123,16 @@ void move(){
             else if(key == LEFT){
                 move_left();
             }
-	    else if(key == SPACE){
+	        else if(key == SPACE){
         //   place_piece(current_x, current_y, 'b');
-            placed_piece[0] = current_x + '0';
-            placed_piece[1] = current_y + '0';
-            placed_piece[2] = 'b'; // let's make it black for now
+                placed_piece[0] = current_x + '0';
+                placed_piece[1] = current_y + '0';
+                placed_piece[2] = 'b'; // let's make it black for now
 
-            write(to_server, placed_piece, sizeof(placed_piece));
-            read(from_server, placed_piece, sizeof(placed_piece));
-            update_board();
+                write(to_server, placed_piece, sizeof(placed_piece));
+                read(from_server, placed_piece, sizeof(placed_piece));
+                update_board();
+                print_board();
         }
         else if(key == QUIT){
             printf("you rage quit\n");
@@ -154,7 +155,7 @@ static void sighandler(int signo) {
 
 int main(){
     signal(SIGINT, sighandler);
-    // initialize();
+    initialize();
     clear();
     gotoxy(0,0);
     print_board();
