@@ -135,16 +135,14 @@ void move(){
             placed_piece[2] = 'b'; // let's make it black for now
 
             write(to_server, placed_piece, sizeof(placed_piece));
-            read(from_server, buffer, sizeof(buffer));
-            printf("received: [%s] from server\n", buffer);
-
-	      update_board();
-            }
-            else if(key == QUIT){
-                printf("you rage quit\n");
-                break;
-            }
+            // read(from_server, buffer, sizeof(buffer));
+            update_board();
         }
+        else if(key == QUIT){
+            printf("you rage quit\n");
+            break;
+        }
+    }
 	gotoBoardXY(current_x, current_y);
     }
     tcsetattr(0, TCSANOW, &initial_settings);
@@ -162,7 +160,6 @@ static void sighandler(int signo) {
 int main(){
     signal(SIGINT, sighandler);
 
-    // initialize();
     clear();
     gotoxy(0,0);
     print_board();

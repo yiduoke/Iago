@@ -3,7 +3,6 @@
 void process(char *s);
 void subserver(int from_client, int to_client);
 void initialize();
-void update_board();
 void place_piece(int x, int y, char piece);
 
 //2D array representation of the board initialization
