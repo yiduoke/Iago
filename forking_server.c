@@ -3,35 +3,6 @@
 
 void process(char *s);
 void subserver(int from_client, int to_client);
-void initialize();
-void place_piece(int x, int y, char piece);
-
-//2D array representation of the board initialization
-// char board[8][8];
-
-// int current_x = 0;
-// int current_y = 0;
-
-//sets board[][] to all spaces, then adds initial pieces
-void initialize(){
-  int y;
-  int x;
-  for(y = 0; y < 8; y++){
-    for(x = 0; x < 8; x++){
-      board[y][x] = ' ';
-    }
-  }
-
-  board[3][3] = 'w';
-  board[3][4] = 'b';
-  board[4][3] = 'b';
-  board[4][4] = 'w';
-}
-
-//changes a piece of board[][]
-void place_piece(int x, int y, char piece){
-  board[y][x] = piece;
-}
 
 static void sighandler(int signo) {
   if (signo == SIGINT) {
@@ -56,8 +27,6 @@ void process(char * s) {
   int data[2];
   data[0] = s[0] - '0';
   data[1] = s[1] - '0';
-
-  place_piece(data[0], data[1], s[2]);
   
   s[0] = data[0];
   s[1] = data[1];
@@ -65,7 +34,6 @@ void process(char * s) {
   printf("1st number: %d\n", data[0]);
   printf("2nd number: %d\n", data[1]);
   printf("color sent from the player: %c\n", s[2]);
-  printf("board at %d, %d: %c\n", data[0], data[1], board[data[1]][data[1]]);
 }
 
 // currently just his previous main he showed on the board
@@ -78,14 +46,16 @@ int main(){
   printf("server starting...\n");
   initialize();
   
+  int player_num = 0;
   while(1){
     from_client = server_setup();
     printf("from_client: %d\n", from_client);
     
     int fork_id = fork();
-
+    player_num++;
     if(!fork_id){
       printf("fork successful\n");
+      printf("player count: %d\n", player_num);
       to_client = server_connect(from_client);
       printf("to_client: %d\n", to_client);
       

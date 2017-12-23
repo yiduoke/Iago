@@ -23,7 +23,6 @@ int server_setup() {
   return from_client;
 }
 
-
 /*=========================
   server_connect
   args: int from_client
@@ -44,43 +43,6 @@ int server_connect(int from_client) {
   printf("received ack: %s\n", buffer);
   printf("connect done\n");
   return to_client;
-}
-
-/*=========================
-  server_handshake
-  args: int * to_client
-
-  Performs the server side pipe 3 way handshake.
-  Sets *to_client to the file descriptor to the downstream pipe.
-
-  returns the file descriptor for the upstream pipe.
-  =========================*/
-int server_handshake(int *to_client) {
-  
-  int from_client;
-
-  char buffer[HANDSHAKE_BUFFER_SIZE];
-  
-  mkfifo("luigi", 0600);
-  
-  //block on open, recieve mesage
-  printf("[server] handshake: making wkp\n");
-  from_client = open( "luigi", O_RDONLY, 0);
-  read(from_client, buffer, sizeof(buffer));
-  printf("[server] handshake: received [%s]\n", buffer);
-
-  remove("luigi");
-  printf("[server] handshake: removed wkp\n");
-    
-  //connect to client, send message
-  *to_client = open(buffer, O_WRONLY, 0);
-  write(*to_client, buffer, sizeof(buffer));
-
-  //read for client
-  read(from_client, buffer, sizeof(buffer));
-  printf("[server] handshake received: %s\n", buffer);
-
-  return from_client;
 }
 
 /*=========================
