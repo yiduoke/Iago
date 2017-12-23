@@ -14,7 +14,6 @@
 #define SPACE ' '
 
 //2D array representation of the board initialization
-char board[8][8];
 
 struct termios initial_settings,
 new_settings;
@@ -134,7 +133,6 @@ void move(){
 
             write(to_server, placed_piece, sizeof(placed_piece));
             read(from_server, placed_piece, sizeof(placed_piece));
-            printf("\n\n received %s from server\n", placed_piece);
             update_board();
         }
         else if(key == QUIT){

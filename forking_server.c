@@ -67,7 +67,7 @@ void process(char * s) {
 
   printf("1st number: %d\n", data[0]);
   printf("2nd number: %d\n", data[1]);
-  printf("color : %c\n", s[2]);
+  printf("color: %c\n", s[2]);
   printf("board at %d, %d: %c\n", data[0], data[1], board[data[1]][data[1]]);
 }
 
