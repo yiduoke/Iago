@@ -59,7 +59,7 @@ void process(char * s) {
   data[0] = s[0] - '0';
   data[1] = s[1] - '0';
 
-  place_piece(data[0], data[1], data[2]);
+  place_piece(data[0], data[1], s[2]);
   
   s[0] = data[0];
   s[1] = data[1];
@@ -67,7 +67,7 @@ void process(char * s) {
 
   printf("1st number: %d\n", data[0]);
   printf("2nd number: %d\n", data[1]);
-  printf("color: %c\n", s[2]);
+  printf("color: %c\n", data[2]);
   printf("board at %d, %d: %c\n", data[0], data[1], board[data[1]][data[1]]);
 }
 

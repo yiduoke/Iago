@@ -156,7 +156,7 @@ static void sighandler(int signo) {
 
 int main(){
     signal(SIGINT, sighandler);
-    initialize();
+    // initialize();
     clear();
     gotoxy(0,0);
     print_board();
