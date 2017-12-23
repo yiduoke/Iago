@@ -12,3 +12,6 @@ controllable and displayable cursor
 
 mdA -- 2017-12-23 14:26
 user can place pieces to flip other pieces
+
+mdA -- 2017-12-23 17:23
+colors and illegal move detection work
