@@ -106,7 +106,7 @@ void move(){
     // handshake the server
     int to_server = 0;
     int from_server = 0;
-    char buffer[BUFFER_SIZE];
+    char placed_piece[3];
   
     from_server = client_handshake( &to_server );
     
@@ -128,13 +128,13 @@ void move(){
             }
 	    else if(key == SPACE){
         //   place_piece(current_x, current_y, 'b');
-            char placed_piece[3];
             placed_piece[0] = current_x + '0';
             placed_piece[1] = current_y + '0';
             placed_piece[2] = 'b'; // let's make it black for now
 
             write(to_server, placed_piece, sizeof(placed_piece));
-            // read(from_server, buffer, sizeof(buffer));
+            read(from_server, placed_piece, sizeof(placed_piece));
+            printf("\n\n received %s from server\n", placed_piece);
             update_board();
         }
         else if(key == QUIT){

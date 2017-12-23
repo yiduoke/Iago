@@ -98,7 +98,7 @@ int client_handshake(int *to_server) {
   char buffer[BUFFER_SIZE];
 
   //send pp name to server
-  printf("[client] handshake: connecting to wkp\n");
+  printf("\n\n[client] handshake: connecting to wkp\n");
   *to_server = open( "luigi", O_WRONLY);
   if ( *to_server == -1 )
     exit(1);
@@ -113,11 +113,11 @@ int client_handshake(int *to_server) {
   from_server = open(buffer, O_RDONLY, 0);
   read(from_server, buffer, sizeof(buffer));
   /*validate buffer code goes here */
-  printf("[client] handshake: received [%s]\n", buffer);
+  printf("\n\n[client] handshake: received [%s]\n", buffer);
 
   //remove pp
   remove(buffer);
-  printf("[client] handshake: removed pp\n");
+  printf("\n\n[client] handshake: removed pp\n");
 
   //send ACK to server
   write(*to_server, ACK, sizeof(buffer));

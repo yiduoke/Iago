@@ -60,10 +60,15 @@ void process(char * s) {
   data[1] = s[1] - '0';
 
   place_piece(data[0], data[1], data[2]);
+  
+  s[0] = data[0];
+  s[1] = data[1];
+  s[2] = data[2];
 
   printf("1st number: %d\n", data[0]);
   printf("2nd number: %d\n", data[1]);
   printf("color : %c\n", s[2]);
+  printf("board at %d, %d: %c\n", data[0], data[1], board[data[1]][data[1]]);
 }
 
 // currently just his previous main he showed on the board
