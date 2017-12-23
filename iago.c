@@ -1,15 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/wait.h>
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/sem.h>
-#include <sys/shm.h>
-#include <errno.h>
-#include <termios.h>
+#include "pipe_networking.h"
 
 #define clear() printf("\033[2J");
 #define hide_cursor() printf("\033[?25l");
@@ -34,20 +23,20 @@ int current_x = 0;
 int current_y = 0;
 
 //sets board[][] to all spaces, then adds initial pieces
-void initialize(){
-  int y;
-  int x;
-  for(y = 0; y < 8; y++){
-    for(x = 0; x < 8; x++){
-      board[y][x] = ' ';
-    }
-  }
+// void initialize(){
+//   int y;
+//   int x;
+//   for(y = 0; y < 8; y++){
+//     for(x = 0; x < 8; x++){
+//       board[y][x] = ' ';
+//     }
+//   }
 
-  board[3][3] = 'w';
-  board[3][4] = 'b';
-  board[4][3] = 'b';
-  board[4][4] = 'w';
-}
+//   board[3][3] = 'w';
+//   board[3][4] = 'b';
+//   board[4][3] = 'b';
+//   board[4][4] = 'w';
+// }
 
 //prints empty board
 void print_board(){
@@ -70,9 +59,9 @@ void update_board(){
 }
 
 //changes a piece of board[][]
-void place_piece(int x, int y, char piece){
-  board[y][x] = piece;
-}
+// void place_piece(int x, int y, char piece){
+//   board[y][x] = piece;
+// }
 
 void move_up(){
     if (current_y - 1 > - 1){// not out of bounds
@@ -113,6 +102,14 @@ void move(){
     new_settings.c_cc[VTIME] = 0;
     
     tcsetattr(0, TCSANOW, &new_settings);
+
+    // handshake the server
+    int to_server = 0;
+    int from_server = 0;
+    char buffer[BUFFER_SIZE];
+  
+    from_server = client_handshake( &to_server );
+    printf("downstream: %d\n", from_server);
     
     while(1){
         n = getchar();
@@ -131,7 +128,14 @@ void move(){
                 move_left();
             }
 	    else if(key == SPACE){
-	      place_piece(current_x, current_y, 'b');
+        //   place_piece(current_x, current_y, 'b');
+        char placed_piece[3];
+        placed_piece[0] = current_x;
+        placed_piece[1] = current_y;
+        placed_piece[2] = 'b'; // let's make it black for now
+
+        write(to_server, placed_piece, sizeof(placed_piece));
+
 	      update_board();
             }
             else if(key == QUIT){
@@ -140,18 +144,27 @@ void move(){
             }
         }
 	gotoBoardXY(current_x, current_y);
-	//printf("X");
-        //printf("current x: %d, current y: %d", current_x, current_y);
     }
     tcsetattr(0, TCSANOW, &initial_settings);
 }
 
+static void sighandler(int signo) {
+    if (signo == SIGINT) {
+      char buffer[HANDSHAKE_BUFFER_SIZE];
+      sprintf(buffer, "%d", getpid());
+      remove(buffer);
+      exit(0);
+    }
+}
+
 int main(){
-    initialize();
+    signal(SIGINT, sighandler);
+
+    // initialize();
     clear();
     gotoxy(0,0);
     print_board();
     update_board();
-
     move();
+
 }
