@@ -22,6 +22,7 @@
 #define RIGHT 'C'
 #define LEFT 'D'
 #define QUIT 'q'
+#define SPACE ' '
 
 //2D array representation of the board initialization
 char board[8][8];
@@ -129,6 +130,10 @@ void move(){
             else if(key == LEFT){
                 move_left();
             }
+	    else if(key == SPACE){
+	      place_piece(current_x, current_y, 'b');
+	      update_board();
+            }
             else if(key == QUIT){
                 printf("you rage quit\n");
                 break;
@@ -143,9 +148,10 @@ void move(){
 
 int main(){
     initialize();
-    //hide_cursor();
     clear();
     gotoxy(0,0);
     print_board();
+    update_board();
+
     move();
 }
