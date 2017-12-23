@@ -1,4 +1,5 @@
 #include "pipe_networking.h"
+#include "forking_server.h"
 
 void process(char *s);
 void subserver(int from_client, int to_client);
@@ -6,13 +7,10 @@ void initialize();
 void place_piece(int x, int y, char piece);
 
 //2D array representation of the board initialization
-char board[8][8];
+// char board[8][8];
 
-struct termios initial_settings,
-new_settings;
-
-int current_x = 0;
-int current_y = 0;
+// int current_x = 0;
+// int current_y = 0;
 
 //sets board[][] to all spaces, then adds initial pieces
 void initialize(){

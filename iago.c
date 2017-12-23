@@ -1,4 +1,5 @@
 #include "pipe_networking.h"
+#include "forking_server.h"
 
 #define clear() printf("\033[2J");
 #define hide_cursor() printf("\033[?25l");
@@ -18,24 +19,21 @@
 struct termios initial_settings,
 new_settings;
 
-int current_x = 0;
-int current_y = 0;
-
 //sets board[][] to all spaces, then adds initial pieces
-void initialize(){
-  int y;
-  int x;
-  for(y = 0; y < 8; y++){
-    for(x = 0; x < 8; x++){
-      board[y][x] = ' ';
-    }
-  }
+// void initialize(){
+//   int y;
+//   int x;
+//   for(y = 0; y < 8; y++){
+//     for(x = 0; x < 8; x++){
+//       board[y][x] = ' ';
+//     }
+//   }
 
-  board[3][3] = 'w';
-  board[3][4] = 'b';
-  board[4][3] = 'b';
-  board[4][4] = 'w';
-}
+//   board[3][3] = 'w';
+//   board[3][4] = 'b';
+//   board[4][3] = 'b';
+//   board[4][4] = 'w';
+// }
 
 //prints empty board
 void print_board(){
