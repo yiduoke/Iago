@@ -1,2 +1,5 @@
 mdA -- 2017-12-22 16:54
 prints board
+
+yiduoK -- 2017-12-22 22:56
+user can navigate the board in the back end only using arrow keys
