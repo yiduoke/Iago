@@ -13,17 +13,10 @@
 #define clear() printf("\033[2J");
 #define hide_cursor() printf("\033[?25l");
 #define gotoxy(x,y) printf("\033[%d;%dH", (x), (y))
-
-// void clear(){
-//     int child = fork();
-//     if (!child){
-//       execlp("clear", "clear", NULL);
-//     }
-//     else{
-//       int status;
-//       wait(&status);
-//     }
-// }
+#define UP "w"
+#define DOWN "S"
+#define RIGHT "^[[C"
+#define LEFT "^[[D"
 
   void print_board(){
     int file = open("board.txt", O_RDONLY);
@@ -32,11 +25,19 @@
     printf("%s", buffer);
 }
 
+void move(){
+    char *input = (char *)calloc(1, 1024);//when in doubt, calloc is always the answer
+    // fgets(input, 2, stdin);
+    scanf("%1s", input);
+    printf("input: [%s]\n", input);
+    // if(!strncmp(UP, input, 1)) printf("up pressed\n");
+}
 int main(){
     hide_cursor();
     clear();
-    while(1){
+    // while(1){
         gotoxy(0,0);
         print_board();
-    }
+        move();
+    // }
 }
