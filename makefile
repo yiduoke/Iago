@@ -2,6 +2,6 @@ all:
 	gcc -o iago iago.c
 clean:
 	rm *~
-	rm #~
+	rm a.out
 run: all
 	./iago
