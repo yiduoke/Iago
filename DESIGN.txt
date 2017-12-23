@@ -1,0 +1,48 @@
+Team M&M: Md Abedin, Yiduo Ke
+
+Description:
+
+We want to make Othello the board game that allows two players on different computers to play against each other. There will be a chat feature to let users send messages to
+each other while playing. There will also be a replay feature which saves game info in files that allows for exact reenactment of matches after they complete.
+
+Interface:
+
+To start, there will be a menu where a user can create a match, join an existing one, or play a replay file. The game will be played in the terminal, and the players can use arrow
+keys to navigate the board and press enter when they've found a spot to place their piece. You can press c to enter the chat mode to send messages back and forth with your
+opponent. The game screen will have the 8x8 board in the middle, match info on the top, and the chat log on the bottom.
+
+Technical design:
+
+	Topics covered in class:
+	- We will allocate memory for arrays and buffers for reading & writing
+	- We will store the board in a text file and interact with the pieces by writing to it
+	- We will store the players' chat in another text file
+	- We will find information from this text file when we save games and let the system reenact the match
+	- We will use stat on replay files to determine when games were played
+	- Forks and pipes to serve many games with 2 players per match
+	- Signal handlers to handle rage quitting
+	- Semaphores to control players writing to the chat file
+	- Networking to let server handle the 2 players on different computers, and to play multiple games at once
+
+	Breaking down tasks
+	Md - converting between the 2D array and the board, creating the network, making chat
+	client
+	Yiduo - taking user input, developing algorithms, implementing the replay system
+
+	Data structures
+	We will use a 2D array for the board. This array, along with the pieces within it,  will be
+	converted to a more human-friendly form and written into the board text file.
+
+	Algorithms
+	We will make an algorithm to determine the color switches that happen when a user
+	places a piece, what places are legal to place pieces, and when the game is won
+
+Timeline:
+
+Displaying the board - Dec 27
+Getting user input - Dec 28
+User interaction with the game - Dec 29
+Network - Jan 1st
+Replay system - Jan 4th
+Chat system - Jan 6th
+Completion by January 7th
