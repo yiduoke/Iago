@@ -15,16 +15,11 @@ void subserver(int from_client, int to_client) {
   char modifying[BUFFER_SIZE];
   read(from_client, modifying, sizeof(modifying));
   printf("got %s from client\n", modifying);
-  
-  process(modifying);
-  printf("after modifying client input: %s\n", modifying);
+
+  printf("after not modifying client input: %s\n", modifying);
   
   write(to_client, modifying, sizeof(modifying));
   printf("done sending modified text to client\n");
-}
-
-void process(char * s) {
-  s[0] = 'B';
 }
 
 // currently just his previous main he showed on the board
@@ -48,7 +43,7 @@ int main(){
       printf("to_client: %d\n", to_client);
       
       while(1){
-	subserver(from_client, to_client);
+	      subserver(from_client, to_client);
       }
     }
   }  
