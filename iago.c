@@ -35,6 +35,7 @@ void get_color(){
     char buffer[5];
     read(from_server, buffer, 1);
     color = buffer[0];
+    printf("\n\n\n my color is %c\n", color);
 }
 
 void place_piece(int x, int y, char piece){
@@ -193,7 +194,6 @@ void move(){
     
   tcsetattr(0, TCSANOW, &new_settings);
     
-  to_server = 0;
   from_server = client_handshake( &to_server );
   char placed_piece[3];
 
@@ -209,7 +209,6 @@ void move(){
     place_piece(enemy_x, enemy_y, placed_piece[2]);
 
     n = getchar();
-    printf("is getchar run?\n");
     if(n != EOF){
       printf("[black] is this running? after EOF");
       key = n;
