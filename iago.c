@@ -219,10 +219,11 @@ void move(){
       
             placed_piece[0] = current_x + '0';
             placed_piece[1] = current_y + '0';
-            placed_piece[2] = 'b'; // let's make it black for now
+            placed_piece[2] = 'b';
 
             write(to_server, placed_piece, sizeof(placed_piece));
             read(from_server, placed_piece, sizeof(placed_piece));
+            printf("received [%s] from server after sending move\n", placed_piece);
 	    }
 	    else{
 	        gotoBoardXY(0,9);
@@ -238,10 +239,11 @@ void move(){
       
             placed_piece[0] = current_x + '0';
             placed_piece[1] = current_y + '0';
-            placed_piece[2] = 'b'; // let's make it black for now
+            placed_piece[2] = 'w'; 
 
             write(to_server, placed_piece, sizeof(placed_piece));
             read(from_server, placed_piece, sizeof(placed_piece));
+            printf("received [%s] from server after sending move\n", placed_piece);
 	    }
 	    else{
 	        gotoBoardXY(0,9);
