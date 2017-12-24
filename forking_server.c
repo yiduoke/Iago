@@ -58,14 +58,15 @@ int main(){
       printf("to_client: %d\n", to_client);
       players[player_num] = to_client;
 
+      if (!(player_num%2)){ // even; black
+        write(to_client, "b", 1);
+        write(to_client, "33w", 3);
+      }
+      else{ // odd, white
+        write(to_client, "w", 1);
+      }
+
       while(1){
-        if (!(player_num%2)){ // even; black
-          write(to_client, "b", 1);
-          write(to_client, "33w", 3);
-        }
-        else{ // odd, white
-          write(to_client, "w", 1);
-        }
 	      subserver(from_client, to_client, player_num);
       }
 
