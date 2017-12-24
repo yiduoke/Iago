@@ -17,8 +17,6 @@ void subserver(int from_client, int to_client, int player) {
   char modifying[BUFFER_SIZE];
   read(from_client, modifying, sizeof(modifying));
   printf("got %s from client\n", modifying);
-  
-  process(modifying);
 
   int to_other_client;
   if (!(player % 2)){ // player has even index
@@ -27,21 +25,10 @@ void subserver(int from_client, int to_client, int player) {
   else{
     to_other_client = players[player-1];
   }
-  write(to_other_client, modifying, sizeof(modifying));
+  if (player>0){
+    write(to_other_client, modifying, sizeof(modifying));
+  }
   // read(from_other_client, modifying, sizeof(modify));
-}
-
-void process(char * s) {
-  int data[2];
-  data[0] = s[0] - '0';
-  data[1] = s[1] - '0';
-  
-  s[0] = data[0];
-  s[1] = data[1];
-
-  printf("1st number: %d\n", data[0]);
-  printf("2nd number: %d\n", data[1]);
-  printf("color sent from the player: %c\n", s[2]);
 }
 
 // currently just his previous main he showed on the board
@@ -63,7 +50,7 @@ int main(){
 
     if(!fork_id){
       printf("fork successful\n");
-      printf("player count: %d\n", player_num);
+      printf("player index: %d\n", player_num);
       to_client = server_connect(from_client);
       printf("to_client: %d\n", to_client);
       players[player_num] = to_client;
