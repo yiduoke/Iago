@@ -200,8 +200,9 @@ void move(){
   int enemy_x, enemy_y; // for receiving enemy's moves
   int move_num = 0;
 
+  get_color();
+
   while(1){
-    get_color();
     // receiving enemy's move
     read(from_server, placed_piece, sizeof(placed_piece));
     enemy_x = placed_piece[0] - '0';
