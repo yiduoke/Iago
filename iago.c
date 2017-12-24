@@ -211,8 +211,9 @@ void move(){
     place_piece(enemy_x, enemy_y, placed_piece[2]);
 
     n = getchar();
+    printf("is getchar run?\n");
     if(n != EOF){
-        printf("[black] is this running? after EOF");
+      printf("[black] is this running? after EOF");
       key = n;
       if(key == UP){
         move_up();
