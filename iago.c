@@ -79,6 +79,7 @@ void print_board(){
   int file = open("board.txt", O_RDONLY);
   char buffer[1024];
   read(file, buffer, sizeof(buffer));
+  close(file);
   printf("%s", buffer);
 
   //printf("\033[0m");
@@ -195,13 +196,11 @@ char *string_move(int x, int y, char piece){
 }
 
 void make_move(char *move){
-  if(move){
-    int x = move[0] - '0';
-    int y = move[1] - '0';
-    char piece = move[2];
-    place_piece(x,y,piece);
-    conquer_pieces(x,y,piece);
-  }
+  int x = move[0] - '0';
+  int y = move[1] - '0';
+  char piece = move[2];
+  place_piece(x,y,piece);
+  conquer_pieces(x,y,piece);
 }
 
 void send_move(char *move, int to_server){
@@ -209,17 +208,11 @@ void send_move(char *move, int to_server){
 }
 
 //handles user inputs
-void move(int from_server, int to_server){
-  char move[3];
-  read(from_server, move, sizeof(move));
-  gotoBoardXY(0,9);
-  printf("\033[0mmove received: %s\033[42m", move);
-  make_move(move);
-  
-  char *input = (char *)calloc(1, 1024);//when in doubt, calloc is always the answer
+void move(int from_server, int to_server){  
+  char *input = (char *)calloc(1, 100);//when in doubt, calloc is always the answer
   int n; 
   unsigned char key;
-
+  
   tcgetattr(0,&initial_settings);
     
   new_settings = initial_settings;
@@ -230,8 +223,18 @@ void move(int from_server, int to_server){
   new_settings.c_cc[VTIME] = 0;
     
   tcsetattr(0, TCSANOW, &new_settings);
-    
+  
+  int moving = 0;
   while(1){
+    if(!moving){
+      char move[3];
+      read(from_server, move, 3);
+      gotoBoardXY(0,9);
+      make_move(move);
+      //printf("\033[0mmove received: %s\033[42m", move);
+      moving = 1;
+    }
+    
     n = getchar();
     if(n != EOF){
       key = n;
@@ -265,8 +268,9 @@ void move(int from_server, int to_server){
 	  place_piece(current_x, current_y, 'b');
 	  conquer_pieces(current_x, current_y, 'b');
 	  gotoBoardXY(0,9);
-	  printf("\033[0mplaced a black piece at (%d, %d) string move: %s\033[42m", current_x, current_y, string_move(current_x, current_y, 'b'));
+	  printf("\033[0mplaced a black piece at (%d, %d) string move: %s\n\033[42m", current_x, current_y, string_move(current_x, current_y, 'b'));
 	  send_move(string_move(current_x, current_y, 'b'), to_server);
+	  moving = 0;
 	}
 	else{
 	  gotoBoardXY(0,9);
@@ -278,7 +282,9 @@ void move(int from_server, int to_server){
 	  place_piece(current_x, current_y, 'w');
 	  conquer_pieces(current_x, current_y, 'w');
 	  gotoBoardXY(0, 9);
-	  printf("\033[0mplaced a white piece at (%d, %d) move string: %s\033[42m", current_x, current_y, string_move(current_x, current_y, 'w'));
+	  printf("\033[0mplaced a white piece at (%d, %d) move string: %s\n\033[42m", current_x, current_y, string_move(current_x, current_y, 'w'));
+	  send_move(string_move(current_x, current_y, 'w'), to_server);
+	  moving = 0;
 	}
 	else{
 	  gotoBoardXY(0,9);
@@ -341,12 +347,14 @@ int client_handshake(int *to_server) {
 int main(){
   int to_server;
   int from_server;
-
+  
   from_server = client_handshake( &to_server );
-
+  
+  clear();
   gotoxy(0,0);
   print_board();
   initialize();
-
+  
+  
   move(from_server, to_server);
 }
