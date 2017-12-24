@@ -11,19 +11,6 @@
 #include <errno.h>
 #include <termios.h>
 
-#include "pipe_networking.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/wait.h>
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/sem.h>
-#include <sys/shm.h>
-#include <errno.h>
-
 #define clear() printf("\033[2J");
 #define hide_cursor() printf("\033[?25l");
 #define gotoxy(x,y) printf("\033[%d;%dH", (y+1), (x+1))
@@ -195,27 +182,14 @@ char *string_move(int x, int y, char piece){
 }
 
 void make_move(char *move){
-  if(move){
-    int x = move[0] - '0';
-    int y = move[1] - '0';
-    char piece = move[2];
-    place_piece(x,y,piece);
-    conquer_pieces(x,y,piece);
-  }
-}
-
-void send_move(char *move, int to_server){
-  write(to_server, move, 3);
+  int x = move[0] - '0';
+  int y = move[1] - '0';
+  char piece = move[2];
+  place_piece(x,y,piece);
 }
 
 //handles user inputs
-void move(int from_server, int to_server){
-  char move[3];
-  read(from_server, move, sizeof(move));
-  gotoBoardXY(0,9);
-  printf("\033[0mmove received: %s\033[42m", move);
-  make_move(move);
-  
+void move(){
   char *input = (char *)calloc(1, 1024);//when in doubt, calloc is always the answer
   int n; 
   unsigned char key;
@@ -266,7 +240,6 @@ void move(int from_server, int to_server){
 	  conquer_pieces(current_x, current_y, 'b');
 	  gotoBoardXY(0,9);
 	  printf("\033[0mplaced a black piece at (%d, %d) string move: %s\033[42m", current_x, current_y, string_move(current_x, current_y, 'b'));
-	  send_move(string_move(current_x, current_y, 'b'), to_server);
 	}
 	else{
 	  gotoBoardXY(0,9);
@@ -296,57 +269,10 @@ void move(int from_server, int to_server){
   tcsetattr(0, TCSANOW, &initial_settings);
 }
 
-int client_handshake(int *to_server) {
-  char name[100];
-  sprintf(name, "%d", (int)getpid());
-  printf("pid: %s\n",name);
-  remove(name);
-  mkfifo(name, 0777);
-  
-  if( access( "public", F_OK ) != -1 ) {
-    // file exists
-    int upstream = open("public", O_WRONLY);
-    write(upstream, name, sizeof(name));
-  
-    int downstream = open(name, O_RDONLY);
-    char input[256];
-    read(downstream, input, sizeof(input));
-    remove(name);
-    printf("input: %s\n", input);
-  
-    write(upstream, "handhshook", 11);
-  
-    *to_server = upstream;
-
-    return downstream;
-  } else {
-    // file doesn't exist
-    int upstream = open("public2", O_WRONLY);
-    write(upstream, name, sizeof(name));
-  
-    int downstream = open(name, O_RDONLY);
-    char input[256];
-    read(downstream, input, sizeof(input));
-    remove(name);
-    printf("input: %s\n", input);
-  
-    write(upstream, "handhshook", 11);
-  
-    *to_server = upstream;
-
-    return downstream;
-  }
-}
-
 int main(){
-  int to_server;
-  int from_server;
-
-  from_server = client_handshake( &to_server );
-
   gotoxy(0,0);
   print_board();
   initialize();
 
-  move(from_server, to_server);
+  move();
 }
