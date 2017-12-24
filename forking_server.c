@@ -17,7 +17,7 @@ void subserver(int from_client, int to_client, int player) {
   char modifying[BUFFER_SIZE];
   printf("[server] trying to read someone's move\n");
   read(from_client, modifying, sizeof(modifying));
-  printf("got %s from client\n", modifying);
+  printf("got %s from a player\n", modifying);
 
   int to_other_client;
   if (!(player % 2)){ // player has even index
@@ -60,8 +60,8 @@ int main(){
           write(to_client, "b", sizeof("b"));
           write(to_client, "33w", sizeof("33w"));
         }
-        else{
-          write(to_client, "w", 1);
+        else{ // odd, white
+          write(to_client, "w", sizeof("w"));
         }
 	      subserver(from_client, to_client, player_num);
       }

@@ -198,7 +198,6 @@ void move(){
   char placed_piece[3];
 
   int enemy_x, enemy_y; // for receiving enemy's moves
-  int move_num = 0;
 
   get_color();
 
@@ -208,6 +207,7 @@ void move(){
     enemy_x = placed_piece[0] - '0';
     enemy_y = placed_piece[1] - '0';
     place_piece(enemy_x, enemy_y, placed_piece[2]);
+    printf("\n\n\ndummy piece: %d %d %c", enemy_x, enemy_y, placed_piece[2]);
 
     n = getchar();
     if(n != EOF){
@@ -235,7 +235,6 @@ void move(){
       }
       else if(key == B){
 	    if(isLegal(current_x, current_y, 'b')){
-            move_num++;
 
 	        place_piece(current_x, current_y, 'b');
 	        conquer_pieces(current_x, current_y, 'b');
@@ -256,7 +255,6 @@ void move(){
       }
       else if(key == W){
 	    if(isLegal(current_x, current_y, 'w')){
-            move_num++;
 
 	        place_piece(current_x, current_y, 'w');
 	        conquer_pieces(current_x, current_y, 'w');
