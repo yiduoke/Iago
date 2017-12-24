@@ -5,6 +5,7 @@ void process(char *s);
 void subserver(int from_client, int to_client, int player);
 
 int players[1024]; // pipes for every player
+int player_num = -1; // handling multiple players and matches; 0-based for easier access
 
 static void sighandler(int signo) {
   if (signo == SIGINT) {
@@ -39,7 +40,6 @@ int main(){
   
   printf("server starting...\n");
   
-  int player_num = -1; // handling multiple players and matches; 0-based for easier access
   while(1){
     from_client = server_setup();
     printf("from_client: %d\n", from_client);
