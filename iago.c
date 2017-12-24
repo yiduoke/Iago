@@ -164,6 +164,10 @@ void move_left(){
   }
 }
 
+int to_server = 0;
+int from_server = client_handshake( &to_server );
+char placed_piece[3];
+
 //handles user inputs
 void move(){
   char *input = (char *)calloc(1, 1024);//when in doubt, calloc is always the answer
@@ -180,11 +184,6 @@ void move(){
   new_settings.c_cc[VTIME] = 0;
     
   tcsetattr(0, TCSANOW, &new_settings);
-
-  int to_server = 0;
-  int from_server = 0;
-  char placed_piece[3];
-  from_server = client_handshake( &to_server );
     
   while(1){
     n = getchar();
@@ -223,7 +222,6 @@ void move(){
 
             write(to_server, placed_piece, sizeof(placed_piece));
             read(from_server, placed_piece, sizeof(placed_piece));
-            printf("received [%s] from server after sending move\n", placed_piece);
 	    }
 	    else{
 	        gotoBoardXY(0,9);
@@ -243,7 +241,6 @@ void move(){
 
             write(to_server, placed_piece, sizeof(placed_piece));
             read(from_server, placed_piece, sizeof(placed_piece));
-            printf("received [%s] from server after sending move\n", placed_piece);
 	    }
 	    else{
 	        gotoBoardXY(0,9);
@@ -260,11 +257,23 @@ void move(){
   tcsetattr(0, TCSANOW, &initial_settings);
 }
 
+
+void receive_move(){
+    int enemy_x, enemy_y;
+    read (from_server, placed_piece, sizeof(placed_piece));
+    char received[256] = "player received enemy's move";
+    write(to_server, received, sizeof(received));
+    
+    enemy_x = placed_piece[0] - '0';
+    enemy_y = placed_piece[1] - '0';
+    place_piece(enemy_x, enemy_y, placed_piece[2]);
+}
+
 static void sighandler(int signo) {
     if (signo == SIGINT) {
       char buffer[HANDSHAKE_BUFFER_SIZE];
       sprintf(buffer, "%d", getpid());
-      remove(buffer);
+      remove(buffer); // removes the private pipe named after the pid; use this in move()
       exit(0);
     }
 }
