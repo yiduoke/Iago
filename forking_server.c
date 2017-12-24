@@ -21,6 +21,11 @@ void subserver(int from_client, int to_client) {
   
   write(to_client, modifying, sizeof(modifying));
   printf("done sending modified text to client\n");
+
+  int i;
+  for (i = 0; i<=player_num; i++){
+    printf("player num's to_client pipe %d: %d\n", i, players[i]);
+  }
 }
 
 // currently just his previous main he showed on the board
@@ -44,11 +49,6 @@ int main(){
       to_client = server_connect(from_client);
       printf("to_client: %d\n", to_client);
       players[player_num] = to_client;
-
-      int i;
-      for (i = 0; i<=player_num; i++){
-        printf("player num %d: %d\n", i, players[i]);
-      }
 
       while(1){
 	      subserver(from_client, to_client);
