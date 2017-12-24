@@ -1,5 +1,4 @@
 #include "pipe_networking.h"
-#include "forking_server.h"
 
 #define clear() printf("\033[2J");
 #define hide_cursor() printf("\033[?25l");
@@ -181,6 +180,11 @@ void move(){
   new_settings.c_cc[VTIME] = 0;
     
   tcsetattr(0, TCSANOW, &new_settings);
+
+  int to_server = 0;
+  int from_server = 0;
+  char placed_piece[3];
+  from_server = client_handshake( &to_server );
     
   while(1){
     n = getchar();

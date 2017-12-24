@@ -44,7 +44,6 @@ int main(){
   int from_client;
   
   printf("server starting...\n");
-  initialize();
   
   int player_num = 0;
   while(1){
