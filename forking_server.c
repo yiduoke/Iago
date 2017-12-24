@@ -2,7 +2,7 @@
 #include "forking_server.h"
 
 void process(char *s);
-void subserver(int from_client, int to_client);
+void subserver(int from_client, int to_client, int player);
 
 int players[1024]; // pipes for every player
 

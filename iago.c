@@ -164,10 +164,6 @@ void move_left(){
   }
 }
 
-int to_server = 0;
-int from_server = client_handshake( &to_server );
-char placed_piece[3];
-
 //handles user inputs
 void move(){
   char *input = (char *)calloc(1, 1024);//when in doubt, calloc is always the answer
@@ -185,6 +181,11 @@ void move(){
     
   tcsetattr(0, TCSANOW, &new_settings);
     
+  int to_server = 0;
+  int from_server = client_handshake( &to_server );
+  char placed_piece[3];
+
+  int enemy_x, enemy_y; // for receiving enemy's moves
   while(1){
     n = getchar();
     if(n != EOF){
@@ -252,6 +253,17 @@ void move(){
 	    break;
       }
     }
+
+    // receiving enemy's move
+    read (from_server, placed_piece, sizeof(placed_piece));
+    enemy_x = placed_piece[0] - '0';
+    enemy_y = placed_piece[1] - '0';
+    place_piece(enemy_x, enemy_y, placed_piece[2]);
+
+    char received[256] = "player received enemy's move";
+    // write(to_server, received, sizeof(received));
+    /////////////////////////////
+
     gotoBoardXY(current_x, current_y);
   }
   tcsetattr(0, TCSANOW, &initial_settings);
@@ -259,14 +271,7 @@ void move(){
 
 
 void receive_move(){
-    int enemy_x, enemy_y;
-    read (from_server, placed_piece, sizeof(placed_piece));
-    char received[256] = "player received enemy's move";
-    write(to_server, received, sizeof(received));
     
-    enemy_x = placed_piece[0] - '0';
-    enemy_y = placed_piece[1] - '0';
-    place_piece(enemy_x, enemy_y, placed_piece[2]);
 }
 
 static void sighandler(int signo) {

@@ -1,7 +1,7 @@
 #include "pipe_networking.h"
 
 void process(char *s);
-void subserver(int from_client, int to_client);
+void subserver(int from_client, int to_client, int player);
 void initialize();
 void place_piece(int x, int y, char piece);
 
