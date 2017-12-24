@@ -35,7 +35,6 @@ void get_color(){
     char buffer[5];
     read(from_server, buffer, 1);
     color = buffer[0];
-    printf("[player] my color is %c\n", color);
 }
 
 void place_piece(int x, int y, char piece){
@@ -204,7 +203,6 @@ void move(){
   while(1){
     get_color();
     // receiving enemy's move
-    printf("blocking when receiving enemy move\n");
     read(from_server, placed_piece, sizeof(placed_piece));
     enemy_x = placed_piece[0] - '0';
     enemy_y = placed_piece[1] - '0';
