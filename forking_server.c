@@ -15,17 +15,20 @@ static void sighandler(int signo) {
 }
 
 void subserver(int from_client, int to_client, int player) {
-  printf("[server] player count: %d\n", player_num);
   char modifying[BUFFER_SIZE];
   int to_other_client;
-  if (!(player % 2)){ // player has even index
-    to_other_client = players[player+1];
+  
+  // after this, switch read/write order
+  if (player_num>0){
+    if (!(player % 2)){ // player has even index
+      to_other_client = players[player+1];
+    }
+    else{
+      to_other_client = players[player-1];
+    }
+    printf("blocking for sending opponent move\n");
+    write(to_other_client, modifying, sizeof(modifying));
   }
-  else{
-    to_other_client = players[player-1];
-  }
-  printf("blocking for sending opponent move\n");
-  write(to_other_client, modifying, sizeof(modifying));
   
   printf("[server] trying to read someone's move\n");
   read(from_client, modifying, sizeof(modifying));
