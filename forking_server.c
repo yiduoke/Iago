@@ -15,6 +15,7 @@ static void sighandler(int signo) {
 
 void subserver(int from_client, int to_client, int player) {
   char modifying[BUFFER_SIZE];
+  printf("[server] trying to read someone's move\n");
   read(from_client, modifying, sizeof(modifying));
   printf("got %s from client\n", modifying);
 
