@@ -35,7 +35,7 @@ void get_color(){
     char buffer[5];
     read(from_server, buffer, 1);
     color = buffer[0];
-    // printf("\n\n\n my color is %c\n", color);
+    printf("\n\n\n my color is %c\n", color);
 }
 
 void place_piece(int x, int y, char piece){
@@ -206,7 +206,7 @@ void move(){
     enemy_x = placed_piece[0] - '0';
     enemy_y = placed_piece[1] - '0';
     place_piece(enemy_x, enemy_y, placed_piece[2]);
-    // printf("\n\n\ndummy piece: %d %d %c", enemy_x, enemy_y, placed_piece[2]);
+    printf("\n\n\ndummy piece: %d %d %c", enemy_x, enemy_y, placed_piece[2]);
 
     n = getchar();
     if(n != EOF){
