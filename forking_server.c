@@ -15,10 +15,6 @@ static void sighandler(int signo) {
 
 void subserver(int from_client, int to_client, int player) {
   char modifying[BUFFER_SIZE];
-  printf("[server] trying to read someone's move\n");
-  read(from_client, modifying, sizeof(modifying));
-  printf("got %s from a player\n", modifying);
-
   int to_other_client;
   if (!(player % 2)){ // player has even index
     to_other_client = players[player+1];
@@ -26,9 +22,12 @@ void subserver(int from_client, int to_client, int player) {
   else{
     to_other_client = players[player-1];
   }
-
   printf("blocking for sending opponent move\n");
   write(to_other_client, modifying, sizeof(modifying));
+  
+  printf("[server] trying to read someone's move\n");
+  read(from_client, modifying, sizeof(modifying));
+  printf("got %s from a player\n", modifying);
 }
 
 // currently just his previous main he showed on the board
