@@ -1,18 +1,18 @@
-forking: iago fserver
+forking: client fserver
 
-basic: iago bserver
+basic: client bserver
 
 fserver: forking_server.o pipe_networking.o
 	gcc -o server forking_server.o pipe_networking.o
 
-iago: iago.o pipe_networking.o
-	gcc -o iago iago.o pipe_networking.o
+client: client.o pipe_networking.o
+	gcc -o client client.o pipe_networking.o
 
 bserver: basic_server.o pipe_networking.o
 	gcc -o server basic_server.o pipe_networking.o
 
-iago.o: iago.c pipe_networking.h
-	gcc -c iago.c
+client.o: client.c pipe_networking.h
+	gcc -c client.c
 
 basic_server.o: basic_server.c pipe_networking.h
 	gcc -c basic_server.c

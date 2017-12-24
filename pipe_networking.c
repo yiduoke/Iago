@@ -23,6 +23,7 @@ int server_setup() {
   return from_client;
 }
 
+
 /*=========================
   server_connect
   args: int from_client
@@ -46,6 +47,43 @@ int server_connect(int from_client) {
 }
 
 /*=========================
+  server_handshake
+  args: int * to_client
+
+  Performs the server side pipe 3 way handshake.
+  Sets *to_client to the file descriptor to the downstream pipe.
+
+  returns the file descriptor for the upstream pipe.
+  =========================*/
+int server_handshake(int *to_client) {
+  
+  int from_client;
+
+  char buffer[HANDSHAKE_BUFFER_SIZE];
+  
+  mkfifo("luigi", 0600);
+  
+  //block on open, recieve mesage
+  printf("[server] handshake: making wkp\n");
+  from_client = open( "luigi", O_RDONLY, 0);
+  read(from_client, buffer, sizeof(buffer));
+  printf("[server] handshake: received [%s]\n", buffer);
+
+  remove("luigi");
+  printf("[server] handshake: removed wkp\n");
+    
+  //connect to client, send message
+  *to_client = open(buffer, O_WRONLY, 0);
+  write(*to_client, buffer, sizeof(buffer));
+
+  //read for client
+  read(from_client, buffer, sizeof(buffer));
+  printf("[server] handshake received: %s\n", buffer);
+
+  return from_client;
+}
+
+/*=========================
   client_handshake
   args: int * to_server
 
@@ -60,7 +98,7 @@ int client_handshake(int *to_server) {
   char buffer[BUFFER_SIZE];
 
   //send pp name to server
-  // printf("\n\n[client] handshake: connecting to wkp\n");
+  printf("[client] handshake: connecting to wkp\n");
   *to_server = open( "luigi", O_WRONLY);
   if ( *to_server == -1 )
     exit(1);
@@ -75,11 +113,11 @@ int client_handshake(int *to_server) {
   from_server = open(buffer, O_RDONLY, 0);
   read(from_server, buffer, sizeof(buffer));
   /*validate buffer code goes here */
-  // printf("\n\n[client] handshake: received [%s]\n", buffer);
+  printf("[client] handshake: received [%s]\n", buffer);
 
   //remove pp
   remove(buffer);
-  // printf("\n\n[client] handshake: removed pp\n");
+  printf("[client] handshake: removed pp\n");
 
   //send ACK to server
   write(*to_server, ACK, sizeof(buffer));
