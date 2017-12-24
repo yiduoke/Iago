@@ -11,6 +11,19 @@
 #include <errno.h>
 #include <termios.h>
 
+#include "pipe_networking.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/wait.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <sys/shm.h>
+#include <errno.h>
+
 #define clear() printf("\033[2J");
 #define hide_cursor() printf("\033[?25l");
 #define gotoxy(x,y) printf("\033[%d;%dH", (y+1), (x+1))
@@ -28,6 +41,9 @@
 
 //2D array representation of the board initialization
 char board[8][8];
+
+//
+char color;
 
 struct termios initial_settings,
   new_settings;
@@ -66,6 +82,7 @@ void print_board(){
   int file = open("board.txt", O_RDONLY);
   char buffer[1024];
   read(file, buffer, sizeof(buffer));
+  close(file);
   printf("%s", buffer);
 
   //printf("\033[0m");
@@ -175,12 +192,58 @@ void move_left(){
   }
 }
 
+char *string_move(int x, int y, char piece){
+  char *move = (char *)calloc(3,1);
+  sprintf(move, "%d%d%c", x, y, piece);
+  return move;
+}
+
+void make_move(char *move){
+  int x = move[0] - '0';
+  int y = move[1] - '0';
+  char piece = move[2];
+  place_piece(x,y,piece);
+  conquer_pieces(x,y,piece);
+}
+
+void send_move(char *move, int to_server){
+  write(to_server, move, 3);
+}
+
+void show_legals(){
+  int y;
+  int x;
+  
+  for(y = 0; y < 8; y++){
+    for(x = 0; x < 8; x++){
+      if (isLegal(x, y, color)){
+	gotoBoardXY(x, y);
+	printf("\033[103m \033[0m");
+      }
+    }
+  }
+}
+
+void hide_legals(){
+  int y;
+  int x;
+  
+  for(y = 0; y < 8; y++){
+    for(x = 0; x < 8; x++){
+      if (board[y][x] == ' '){
+	gotoBoardXY(x, y);
+	printf("\033[42m ");
+      }
+    }
+  }
+}
+
 //handles user inputs
-void move(){
-  char *input = (char *)calloc(1, 1024);//when in doubt, calloc is always the answer
+void move(int from_server, int to_server){  
+  char *input = (char *)calloc(1, 100);//when in doubt, calloc is always the answer
   int n; 
   unsigned char key;
-
+  
   tcgetattr(0,&initial_settings);
     
   new_settings = initial_settings;
@@ -191,8 +254,22 @@ void move(){
   new_settings.c_cc[VTIME] = 0;
     
   tcsetattr(0, TCSANOW, &new_settings);
-    
+  
+  int moving = 0;
   while(1){
+    if(!moving){
+      char move[3];
+      read(from_server, move, 3);
+      
+      color = 'b';
+      if(move[2] == 'b') color = 'w';
+      
+      gotoBoardXY(0,9);
+      make_move(move);
+      show_legals();
+      moving = 1;
+    }
+    
     n = getchar();
     if(n != EOF){
       key = n;
@@ -216,28 +293,19 @@ void move(){
 	gotoBoardXY(0,9);
 	clearLine();
       }
-      else if(key == B){
-	if(isLegal(current_x, current_y, 'b')){
-	  place_piece(current_x, current_y, 'b');
-	  conquer_pieces(current_x, current_y, 'b');
+      else if(key == ' '){
+	if(isLegal(current_x, current_y, color)){
+	  place_piece(current_x, current_y, color);
+	  conquer_pieces(current_x, current_y, color);
+	  hide_legals();
 	  gotoBoardXY(0,9);
-	  printf("\033[0mplaced a black piece at (%d, %d)\033[42m", current_x, current_y);
+	  printf("\033[0mplaced a piece at (%d, %d)\n\033[42m", current_x, current_y);
+	  send_move(string_move(current_x, current_y, color), to_server);
+	  moving = 0;
 	}
 	else{
 	  gotoBoardXY(0,9);
-	  printf("\033[0mcan't place a black piece at (%d, %d)\033[42m", current_x, current_y);
-	}
-      }
-      else if(key == W){
-	if(isLegal(current_x, current_y, 'w')){
-	  place_piece(current_x, current_y, 'w');
-	  conquer_pieces(current_x, current_y, 'w');
-	  gotoBoardXY(0, 9);
-	  printf("\033[0mplaced a white piece at (%d, %d)\033[42m", current_x, current_y);
-	}
-	else{
-	  gotoBoardXY(0,9);
-	  printf("\033[0mcan't place a white piece at (%d, %d)\033[42m", current_x, current_y);
+	  printf("\033[0mcan't place a piece at (%d, %d)\033[42m", current_x, current_y);
 	}
       }
       else if(key == QUIT){
@@ -251,10 +319,59 @@ void move(){
   tcsetattr(0, TCSANOW, &initial_settings);
 }
 
+int client_handshake(int *to_server) {
+  char name[100];
+  sprintf(name, "%d", (int)getpid());
+  printf("pid: %s\n",name);
+  remove(name);
+  mkfifo(name, 0777);
+  
+  if( access( "public", F_OK ) != -1 ) {
+    // file exists
+    int upstream = open("public", O_WRONLY);
+    write(upstream, name, sizeof(name));
+  
+    int downstream = open(name, O_RDONLY);
+    char input[256];
+    read(downstream, input, sizeof(input));
+    remove(name);
+    printf("input: %s\n", input);
+  
+    write(upstream, "handhshook", 11);
+  
+    *to_server = upstream;
+
+    return downstream;
+  } else {
+    // file doesn't exist
+    int upstream = open("public2", O_WRONLY);
+    write(upstream, name, sizeof(name));
+  
+    int downstream = open(name, O_RDONLY);
+    char input[256];
+    read(downstream, input, sizeof(input));
+    remove(name);
+    printf("input: %s\n", input);
+  
+    write(upstream, "handhshook", 11);
+  
+    *to_server = upstream;
+
+    return downstream;
+  }
+}
+
 int main(){
+  int to_server;
+  int from_server;
+  
+  from_server = client_handshake( &to_server );
+  
+  clear();
   gotoxy(0,0);
   print_board();
   initialize();
-
-  move();
+  
+  
+  move(from_server, to_server);
 }
