@@ -179,7 +179,6 @@ void move_left(){
 
 //handles user inputs
 void move(){
-  char *input = (char *)calloc(1, 1024);//when in doubt, calloc is always the answer
   int n; 
   unsigned char key;
 
@@ -210,6 +209,7 @@ void move(){
     printf("\n\n\ndummy piece: %d %d %c", enemy_x, enemy_y, placed_piece[2]);
 
     n = getchar();
+    printf("umm is this EOF? this is n: %c\n", n);
     if(n != EOF){
       printf("[black] is this running? after EOF");
       key = n;
