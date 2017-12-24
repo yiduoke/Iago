@@ -1,7 +1,6 @@
 #include "pipe_networking.h"
 #include <signal.h>
 
-void process(char *s);
 void subserver(int from_client, int to_client);
 
 static void sighandler(int signo) {
