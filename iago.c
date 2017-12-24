@@ -186,6 +186,8 @@ void move(){
   char placed_piece[3];
 
   int enemy_x, enemy_y; // for receiving enemy's moves
+  int move_num = 0;
+
   while(1){
     n = getchar();
     if(n != EOF){
@@ -241,7 +243,6 @@ void move(){
             placed_piece[2] = 'w'; 
 
             write(to_server, placed_piece, sizeof(placed_piece));
-            read(from_server, placed_piece, sizeof(placed_piece));
 	    }
 	    else{
 	        gotoBoardXY(0,9);
@@ -255,10 +256,13 @@ void move(){
     }
 
     // receiving enemy's move
-    // read (from_server, placed_piece, sizeof(placed_piece));
-    // enemy_x = placed_piece[0] - '0';
-    // enemy_y = placed_piece[1] - '0';
-    // place_piece(enemy_x, enemy_y, placed_piece[2]);
+    move_num++;
+    if (move_num>2){
+        read (from_server, placed_piece, sizeof(placed_piece));
+        enemy_x = placed_piece[0] - '0';
+        enemy_y = placed_piece[1] - '0';
+        place_piece(enemy_x, enemy_y, placed_piece[2]);
+    }
 
     char received[256] = "player received enemy's move";
     // write(to_server, received, sizeof(received));

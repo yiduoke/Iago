@@ -19,9 +19,6 @@ void subserver(int from_client, int to_client, int player) {
   printf("got %s from client\n", modifying);
   
   process(modifying);
-  printf("after modifying client input: %s\n", modifying);
-  
-  write(to_client, modifying, sizeof(modifying));
 
   int to_other_client;
   if (!(player % 2)){ // player has even index
