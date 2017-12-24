@@ -206,7 +206,6 @@ void move(){
     // receiving enemy's move
     printf("blocking when receiving enemy move\n");
     read(from_server, placed_piece, sizeof(placed_piece));
-    printf("[black player] dummy move for black: %s\n", placed_piece);
     enemy_x = placed_piece[0] - '0';
     enemy_y = placed_piece[1] - '0';
     place_piece(enemy_x, enemy_y, placed_piece[2]);
