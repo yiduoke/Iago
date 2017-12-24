@@ -261,7 +261,7 @@ void move(){
     }
 
     // receiving enemy's move
-    if (move_num>2){
+    if (move_num>1){
         read(from_server, placed_piece, sizeof(placed_piece));
         printf("blocking when receiving enemy move\n");
         enemy_x = placed_piece[0] - '0';

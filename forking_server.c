@@ -26,10 +26,9 @@ void subserver(int from_client, int to_client, int player) {
   else{
     to_other_client = players[player-1];
   }
-  if (player>0){
-    printf("blocking for sending opponent move\n");
-    write(to_other_client, modifying, sizeof(modifying));
-  }
+  
+  printf("blocking for sending opponent move\n");
+  write(to_other_client, modifying, sizeof(modifying));
 }
 
 // currently just his previous main he showed on the board
