@@ -26,7 +26,7 @@ void subserver(int from_client, int to_client, int player) {
   else{
     to_other_client = players[player-1];
   }
-  
+
   printf("blocking for sending opponent move\n");
   write(to_other_client, modifying, sizeof(modifying));
 }
@@ -56,7 +56,13 @@ int main(){
       players[player_num] = to_client;
 
       while(1){
-        printf("doing subserver function now\n");
+        if (!(player_num%2)){ // even; black
+          write(to_client, "b", 1);
+          // write(to_client, "33w", 3);
+        }
+        else{
+          write(to_client, "w", 1);
+        }
 	      subserver(from_client, to_client, player_num);
       }
 

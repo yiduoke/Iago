@@ -24,7 +24,20 @@ struct termios initial_settings,
 int current_x = 0;
 int current_y = 0;
 
+char color;
+
+int to_server = 0;
+int from_server = 0;
+
 //changes a piece of board[][]
+
+void get_color(){
+    char buffer[5];
+    read(from_server, buffer, 1);
+    color = buffer[0];
+    printf("[player] my color is %c\n", color);
+}
+
 void place_piece(int x, int y, char piece){
   board[y][x] = piece;
   gotoBoardXY(x,y);
@@ -181,8 +194,8 @@ void move(){
     
   tcsetattr(0, TCSANOW, &new_settings);
     
-  int to_server = 0;
-  int from_server = client_handshake( &to_server );
+  to_server = 0;
+  from_server = client_handshake( &to_server );
   char placed_piece[3];
 
   int enemy_x, enemy_y; // for receiving enemy's moves
@@ -268,17 +281,11 @@ void move(){
     place_piece(enemy_x, enemy_y, placed_piece[2]);
 
     char received[256] = "player received enemy's move";
-    // write(to_server, received, sizeof(received));
     /////////////////////////////
 
     gotoBoardXY(current_x, current_y);
   }
   tcsetattr(0, TCSANOW, &initial_settings);
-}
-
-
-void receive_move(){
-    
 }
 
 static void sighandler(int signo) {
