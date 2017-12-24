@@ -268,9 +268,10 @@ static void sighandler(int signo) {
 }
 
 int main(){
-  gotoxy(0,0);
-  print_board();
-  initialize();
-
-  move();
+    clear();
+    gotoxy(0,0);
+    print_board();
+    initialize();
+  
+    move();
 }
