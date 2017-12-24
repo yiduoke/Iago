@@ -223,8 +223,8 @@ void move(){
             placed_piece[1] = current_y + '0';
             placed_piece[2] = 'b';
 
+            printf("writing to server about the move now\n");
             write(to_server, placed_piece, sizeof(placed_piece));
-            read(from_server, placed_piece, sizeof(placed_piece));
 	    }
 	    else{
 	        gotoBoardXY(0,9);
@@ -242,6 +242,7 @@ void move(){
             placed_piece[1] = current_y + '0';
             placed_piece[2] = 'w'; 
 
+            printf("writing to server about the move now\n");
             write(to_server, placed_piece, sizeof(placed_piece));
 	    }
 	    else{
