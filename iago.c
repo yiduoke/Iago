@@ -210,6 +210,7 @@ void move(){
     enemy_x = placed_piece[0] - '0';
     enemy_y = placed_piece[1] - '0';
     place_piece(enemy_x, enemy_y, placed_piece[2]);
+    printf("black finished placing dummy move\n");
 
     n = getchar();
     if(n != EOF){
