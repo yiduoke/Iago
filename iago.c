@@ -202,6 +202,15 @@ void move(){
   int move_num = 0;
 
   while(1){
+    get_color();
+    // receiving enemy's move
+    read(from_server, placed_piece, sizeof(placed_piece));
+    printf("blocking when receiving enemy move\n");
+    enemy_x = placed_piece[0] - '0';
+    enemy_y = placed_piece[1] - '0';
+    place_piece(enemy_x, enemy_y, placed_piece[2]);
+    
+        char received[256] = "player received enemy's move";
     n = getchar();
     if(n != EOF){
       key = n;
@@ -272,16 +281,6 @@ void move(){
 	    break;
       }
     }
-
-    // receiving enemy's move
-    read(from_server, placed_piece, sizeof(placed_piece));
-    printf("blocking when receiving enemy move\n");
-    enemy_x = placed_piece[0] - '0';
-    enemy_y = placed_piece[1] - '0';
-    place_piece(enemy_x, enemy_y, placed_piece[2]);
-
-    char received[256] = "player received enemy's move";
-    /////////////////////////////
 
     gotoBoardXY(current_x, current_y);
   }

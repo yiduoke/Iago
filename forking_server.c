@@ -58,7 +58,7 @@ int main(){
       while(1){
         if (!(player_num%2)){ // even; black
           write(to_client, "b", 1);
-          // write(to_client, "33w", 3);
+          write(to_client, "33w", 3);
         }
         else{
           write(to_client, "w", 1);
