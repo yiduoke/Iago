@@ -61,7 +61,7 @@ int main(){
           write(to_client, "33w", 3);
         }
         else{ // odd, white
-          write(to_client, "w", sizeof("w"));
+          write(to_client, "w", 1);
         }
 	      subserver(from_client, to_client, player_num);
       }
