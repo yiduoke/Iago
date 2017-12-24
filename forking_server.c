@@ -15,6 +15,7 @@ static void sighandler(int signo) {
 }
 
 void subserver(int from_client, int to_client, int player) {
+  printf("[server] player count: %d\n", player_num);
   char modifying[BUFFER_SIZE];
   int to_other_client;
   if (!(player % 2)){ // player has even index
