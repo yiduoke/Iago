@@ -42,6 +42,9 @@
 //2D array representation of the board initialization
 char board[8][8];
 
+//
+char color;
+
 struct termios initial_settings,
   new_settings;
 
@@ -207,6 +210,34 @@ void send_move(char *move, int to_server){
   write(to_server, move, 3);
 }
 
+void show_legals(){
+  int y;
+  int x;
+  
+  for(y = 0; y < 8; y++){
+    for(x = 0; x < 8; x++){
+      if (isLegal(x, y, color)){
+	gotoBoardXY(x, y);
+	printf("\033[103m \033[0m");
+      }
+    }
+  }
+}
+
+void hide_legals(){
+  int y;
+  int x;
+  
+  for(y = 0; y < 8; y++){
+    for(x = 0; x < 8; x++){
+      if (board[y][x] == ' '){
+	gotoBoardXY(x, y);
+	printf("\033[42m ");
+      }
+    }
+  }
+}
+
 //handles user inputs
 void move(int from_server, int to_server){  
   char *input = (char *)calloc(1, 100);//when in doubt, calloc is always the answer
@@ -229,9 +260,13 @@ void move(int from_server, int to_server){
     if(!moving){
       char move[3];
       read(from_server, move, 3);
+      
+      color = 'b';
+      if(move[2] == 'b') color = 'w';
+      
       gotoBoardXY(0,9);
       make_move(move);
-      //printf("\033[0mmove received: %s\033[42m", move);
+      show_legals();
       moving = 1;
     }
     
@@ -258,37 +293,19 @@ void move(int from_server, int to_server){
 	gotoBoardXY(0,9);
 	clearLine();
       }
-      else if(key == 'm'){
-	make_move("66w");
-	gotoBoardXY(0,9);
-	printf("\033[0mmade move\033[42m");
-      }
-      else if(key == B){
-	if(isLegal(current_x, current_y, 'b')){
-	  place_piece(current_x, current_y, 'b');
-	  conquer_pieces(current_x, current_y, 'b');
+      else if(key == ' '){
+	if(isLegal(current_x, current_y, color)){
+	  place_piece(current_x, current_y, color);
+	  conquer_pieces(current_x, current_y, color);
+	  hide_legals();
 	  gotoBoardXY(0,9);
-	  printf("\033[0mplaced a black piece at (%d, %d) string move: %s\n\033[42m", current_x, current_y, string_move(current_x, current_y, 'b'));
-	  send_move(string_move(current_x, current_y, 'b'), to_server);
+	  printf("\033[0mplaced a piece at (%d, %d)\n\033[42m", current_x, current_y);
+	  send_move(string_move(current_x, current_y, color), to_server);
 	  moving = 0;
 	}
 	else{
 	  gotoBoardXY(0,9);
-	  printf("\033[0mcan't place a black piece at (%d, %d)\033[42m", current_x, current_y);
-	}
-      }
-      else if(key == W){
-	if(isLegal(current_x, current_y, 'w')){
-	  place_piece(current_x, current_y, 'w');
-	  conquer_pieces(current_x, current_y, 'w');
-	  gotoBoardXY(0, 9);
-	  printf("\033[0mplaced a white piece at (%d, %d) move string: %s\n\033[42m", current_x, current_y, string_move(current_x, current_y, 'w'));
-	  send_move(string_move(current_x, current_y, 'w'), to_server);
-	  moving = 0;
-	}
-	else{
-	  gotoBoardXY(0,9);
-	  printf("\033[0mcan't place a white piece at (%d, %d)\033[42m", current_x, current_y);
+	  printf("\033[0mcan't place a piece at (%d, %d)\033[42m", current_x, current_y);
 	}
       }
       else if(key == QUIT){
