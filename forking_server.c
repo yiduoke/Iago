@@ -23,16 +23,14 @@ void subserver(int from_client, int to_client, int player) {
   read(from_client, modifying, sizeof(modifying));
   printf("got %s from a player\n", modifying);
 
-  if (player_num>0){
-    if (!(player % 2)){ // player has even index
-      to_other_client = players[player+1];
-    }
-    else{
-      to_other_client = players[player-1];
-    }
-    printf("blocking for sending opponent move\n");
-    write(to_other_client, modifying, sizeof(modifying));
+  if (!(player % 2)){ // player has even index
+    to_other_client = players[player+1];
   }
+  else{
+    to_other_client = players[player-1];
+  }
+  printf("blocking for sending opponent move\n");
+  write(to_other_client, modifying, sizeof(modifying));
 }
 
 // currently just his previous main he showed on the board
