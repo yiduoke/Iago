@@ -175,6 +175,19 @@ void move_left(){
   }
 }
 
+char *string_move(int x, int y, char piece){
+  char *move = (char *)calloc(3,1);
+  sprintf(move, "%d%d%c", x, y, piece);
+  return move;
+}
+
+void make_move(char *move){
+  int x = move[0] - '0';
+  int y = move[1] - '0';
+  char piece = move[2];
+  place_piece(x,y,piece);
+}
+
 //handles user inputs
 void move(){
   char *input = (char *)calloc(1, 1024);//when in doubt, calloc is always the answer
@@ -216,12 +229,17 @@ void move(){
 	gotoBoardXY(0,9);
 	clearLine();
       }
+      else if(key == 'm'){
+	make_move("66w");
+	gotoBoardXY(0,9);
+	printf("\033[0mmade move\033[42m");
+      }
       else if(key == B){
 	if(isLegal(current_x, current_y, 'b')){
 	  place_piece(current_x, current_y, 'b');
 	  conquer_pieces(current_x, current_y, 'b');
 	  gotoBoardXY(0,9);
-	  printf("\033[0mplaced a black piece at (%d, %d)\033[42m", current_x, current_y);
+	  printf("\033[0mplaced a black piece at (%d, %d) string move: %s\033[42m", current_x, current_y, string_move(current_x, current_y, 'b'));
 	}
 	else{
 	  gotoBoardXY(0,9);
@@ -233,7 +251,7 @@ void move(){
 	  place_piece(current_x, current_y, 'w');
 	  conquer_pieces(current_x, current_y, 'w');
 	  gotoBoardXY(0, 9);
-	  printf("\033[0mplaced a white piece at (%d, %d)\033[42m", current_x, current_y);
+	  printf("\033[0mplaced a white piece at (%d, %d) move string: %s\033[42m", current_x, current_y, string_move(current_x, current_y, 'w'));
 	}
 	else{
 	  gotoBoardXY(0,9);
