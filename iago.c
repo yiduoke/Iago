@@ -257,14 +257,14 @@ void move(){
     }
 
     // receiving enemy's move
-    move_num++;
-    if (move_num>2){
-        read(from_server, placed_piece, sizeof(placed_piece));
-        printf("blocking when receiving enemy move\n");
-        enemy_x = placed_piece[0] - '0';
-        enemy_y = placed_piece[1] - '0';
-        place_piece(enemy_x, enemy_y, placed_piece[2]);
-    }
+    // move_num++;
+    // if (move_num>2){
+    //     read(from_server, placed_piece, sizeof(placed_piece));
+    //     printf("blocking when receiving enemy move\n");
+    //     enemy_x = placed_piece[0] - '0';
+    //     enemy_y = placed_piece[1] - '0';
+    //     place_piece(enemy_x, enemy_y, placed_piece[2]);
+    // }
 
     char received[256] = "player received enemy's move";
     // write(to_server, received, sizeof(received));

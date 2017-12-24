@@ -19,17 +19,17 @@ void subserver(int from_client, int to_client, int player) {
   read(from_client, modifying, sizeof(modifying));
   printf("got %s from client\n", modifying);
 
-  int to_other_client;
-  if (!(player % 2)){ // player has even index
-    to_other_client = players[player+1];
-  }
-  else{
-    to_other_client = players[player-1];
-  }
-  if (player>0){
-    printf("blocking for sending opponent move\n");
-    write(to_other_client, modifying, sizeof(modifying));
-  }
+  // int to_other_client;
+  // if (!(player % 2)){ // player has even index
+  //   to_other_client = players[player+1];
+  // }
+  // else{
+  //   to_other_client = players[player-1];
+  // }
+  // if (player>0){
+  //   printf("blocking for sending opponent move\n");
+  //   write(to_other_client, modifying, sizeof(modifying));
+  // }
   // read(from_other_client, modifying, sizeof(modify));
 }
 
@@ -59,7 +59,6 @@ int main(){
 
       while(1){
         printf("doing subserver function now\n");
-	      subserver(from_client, to_client, player_num);
       }
 
     }
