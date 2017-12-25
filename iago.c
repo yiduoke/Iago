@@ -33,8 +33,8 @@ char board[8][8];
 // color of player piece
 char color;
 
-int my_count = -2;
-int enemy_count = -2;
+int my_count = 0;
+int enemy_count = 0;
 
 struct termios initial_settings,
   new_settings;
@@ -53,6 +53,10 @@ static void sighandler(int signo) {
 
 // change a piece of on the board
 void place_piece(int x, int y, char piece){
+  // place_piece(3,3,'w'); //copied these 4 lines for reference
+  // place_piece(3,4,'b');
+  // place_piece(4,3,'b');
+  // place_piece(4,4,'w');
   if (board[y][x]==' '){ //the piece is placed on an empty spot
     if (piece == color){
       my_count++;
@@ -62,7 +66,7 @@ void place_piece(int x, int y, char piece){
     }
   }
   else{// the spot is not empty
-    if (board[y][x] != piece){
+    if (board[y][x] != piece /*&& (x!=3 && y!=3) && (x!=3 && y!=4) && (x!=4 && y!=3) && (x!=4 && y!=4)*/){
       if (board[y][x]==color){// if that spot is gonna be turned over to the enemy
         my_count--;
         enemy_count++;
