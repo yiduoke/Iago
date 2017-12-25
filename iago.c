@@ -307,7 +307,18 @@ void move(int from_server, int to_server){
   tcsetattr(0, TCSANOW, &initial_settings);
 }
 
+static void sighandler(int signo) {
+  if (signo == SIGINT) {
+    char buffer[HANDSHAKE_BUFFER_SIZE];
+    sprintf(buffer, "%d", getpid());
+    remove(buffer);
+    exit(0);
+  }
+}
+
 int main(){
+  signal(SIGINT, sighandler);
+  
   int to_server;
   int from_server;
   
