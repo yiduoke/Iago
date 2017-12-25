@@ -10,19 +10,7 @@
 #include <sys/shm.h>
 #include <errno.h>
 #include <termios.h>
-
 #include "pipe_networking.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/wait.h>
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/sem.h>
-#include <sys/shm.h>
-#include <errno.h>
 
 #define clear() printf("\033[2J");
 #define hide_cursor() printf("\033[?25l");
@@ -317,48 +305,6 @@ void move(int from_server, int to_server){
     gotoBoardXY(current_x, current_y);
   }
   tcsetattr(0, TCSANOW, &initial_settings);
-}
-
-int client_handshake(int *to_server) {
-  char name[100];
-  sprintf(name, "%d", (int)getpid());
-  printf("pid: %s\n",name);
-  remove(name);
-  mkfifo(name, 0777);
-  
-  if( access( "public", F_OK ) != -1 ) {
-    // file exists
-    int upstream = open("public", O_WRONLY);
-    write(upstream, name, sizeof(name));
-  
-    int downstream = open(name, O_RDONLY);
-    char input[256];
-    read(downstream, input, sizeof(input));
-    remove(name);
-    printf("input: %s\n", input);
-  
-    write(upstream, "handhshook", 11);
-  
-    *to_server = upstream;
-
-    return downstream;
-  } else {
-    // file doesn't exist
-    int upstream = open("public2", O_WRONLY);
-    write(upstream, name, sizeof(name));
-  
-    int downstream = open(name, O_RDONLY);
-    char input[256];
-    read(downstream, input, sizeof(input));
-    remove(name);
-    printf("input: %s\n", input);
-  
-    write(upstream, "handhshook", 11);
-  
-    *to_server = upstream;
-
-    return downstream;
-  }
 }
 
 int main(){
