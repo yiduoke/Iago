@@ -57,44 +57,46 @@ int server_handshake2(int *to_client) {
   Sets *to_server to the file descriptor for the upstream pipe.
   returns the file descriptor for the downstream pipe.
   =========================*/
-int client_handshake(int *to_server) {
-  char name[100];
-  sprintf(name, "%d", (int)getpid());
-  printf("pid: %s\n",name);
-  remove(name);
-  mkfifo(name, 0777);
-  
-  if( access( "public", F_OK ) != -1 ) {
-    // file exists
-    int upstream = open("public", O_WRONLY);
-    write(upstream, name, sizeof(name));
-  
-    int downstream = open(name, O_RDONLY);
-    char input[256];
-    read(downstream, input, sizeof(input));
-    remove(name);
-    printf("input: %s\n", input);
-  
-    write(upstream, "handhshook", 11);
-  
-    *to_server = upstream;
 
-    return downstream;
-  } else {
-    // file doesn't exist
-    int upstream = open("public2", O_WRONLY);
-    write(upstream, name, sizeof(name));
-  
-    int downstream = open(name, O_RDONLY);
-    char input[256];
-    read(downstream, input, sizeof(input));
-    remove(name);
-    printf("input: %s\n", input);
-  
-    write(upstream, "handhshook", 11);
-  
-    *to_server = upstream;
 
-    return downstream;
+  int client_handshake(int *to_server) {
+    char name[100];
+    sprintf(name, "%d", (int)getpid());
+    printf("pid: %s\n",name);
+    remove(name);
+    mkfifo(name, 0777);
+    
+    if( access( "public", F_OK ) != -1 ) {
+      // file exists
+      int upstream = open("public", O_WRONLY);
+      write(upstream, name, sizeof(name));
+    
+      int downstream = open(name, O_RDONLY);
+      char input[256];
+      read(downstream, input, sizeof(input));
+      remove(name);
+      printf("input: %s\n", input);
+    
+      write(upstream, "handhshook", 11);
+    
+      *to_server = upstream;
+  
+      return downstream;
+    } else {
+      // file doesn't exist
+      int upstream = open("public2", O_WRONLY);
+      write(upstream, name, sizeof(name));
+    
+      int downstream = open(name, O_RDONLY);
+      char input[256];
+      read(downstream, input, sizeof(input));
+      remove(name);
+      printf("input: %s\n", input);
+    
+      write(upstream, "handhshook", 11);
+    
+      *to_server = upstream;
+  
+      return downstream;
+    }
   }
-}
