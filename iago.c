@@ -112,7 +112,7 @@ void print_board(){
   char buffer[1024];
   read(file, buffer, sizeof(buffer));
   close(file);
-  printf("%s", buffer);
+  printf("%s\n", buffer);
 
   //printf("\033[0m");
 }
