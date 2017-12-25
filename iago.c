@@ -53,10 +53,6 @@ static void sighandler(int signo) {
 
 // change a piece of on the board
 void place_piece(int x, int y, char piece){
-  // place_piece(3,3,'w'); //copied these 4 lines for reference
-  // place_piece(3,4,'b');
-  // place_piece(4,3,'b');
-  // place_piece(4,4,'w');
   if (board[y][x]==' '){ //the piece is placed on an empty spot
     if (piece == color){
       my_count++;
@@ -290,6 +286,8 @@ void move(int from_server, int to_server){
   
   int moving = 0;
   while(1){
+    int num_legals = 0;// for no legal moves handling
+
     if(!moving){
       char move[3];
       read(from_server, move, 3); //receiving enemy move
@@ -328,12 +326,20 @@ void move(int from_server, int to_server){
       }
       else if(key == ' '){
 	if(isLegal(current_x, current_y, color)){
-    place_piece(current_x, current_y, color);
-    conquer_pieces(current_x, current_y, color);
-	  hide_legals();
-	  gotoBoardXY(0,9);
-	  printf("\033[0mplaced a piece at (%d, %d)\n\033[42m", current_x, current_y);
-    send_move(string_move(current_x, current_y, color), to_server);
+    num_legals++;
+    if (!num_legals){// no legal moves
+      printf("your turn will be skipped because there are no legal moves\n");
+      sleep(2);
+      send_move("33w", to_server);
+    }
+    else{// there are legal moves
+      place_piece(current_x, current_y, color);
+      conquer_pieces(current_x, current_y, color);
+      hide_legals();
+      gotoBoardXY(0,9);
+      printf("\033[0mplaced a piece at (%d, %d)\n\033[42m", current_x, current_y);
+      send_move(string_move(current_x, current_y, color), to_server);
+    }
     
     printf("\n enemy count: %d\n", enemy_count);
     printf("\n my count: %d\n", my_count);
