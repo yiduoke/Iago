@@ -33,8 +33,8 @@ char board[8][8];
 // color of player piece
 char color;
 
-int my_count = 0;
-int enemy_count = 0;
+int my_count = 2;
+int enemy_count = 2;
 
 struct termios initial_settings,
   new_settings;
@@ -66,7 +66,7 @@ void place_piece(int x, int y, char piece){
     }
   }
   else{// the spot is not empty
-    if (board[y][x] != piece /*&& (x!=3 && y!=3) && (x!=3 && y!=4) && (x!=4 && y!=3) && (x!=4 && y!=4)*/){
+    if (board[y][x] != piece && !(x==3 && y==3) && !(x==3 && y==4) && !(x==4 && y==3) && !(x==4 && y==4)){
       if (board[y][x]==color){// if that spot is gonna be turned over to the enemy
         my_count--;
         enemy_count++;
