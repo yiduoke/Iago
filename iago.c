@@ -33,8 +33,8 @@ char board[8][8];
 // color of player piece
 char color;
 
-int my_count = 2;
-int enemy_count = 2;
+int my_count = -2;
+int enemy_count = -2;
 
 struct termios initial_settings,
   new_settings;
