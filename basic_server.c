@@ -22,11 +22,7 @@ int main() {
   from_client = server_handshake( &to_client );
   from_client2 = server_handshake2( &to_client2 );
   
-<<<<<<< HEAD
-  write(to_client, "start", 5);
-=======
   write(to_client, "33w", 3);
->>>>>>> origin/md
   printf("initiated\n");
   
   int turn = 0;
