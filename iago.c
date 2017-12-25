@@ -335,24 +335,24 @@ void move(int from_server, int to_server){
 	  printf("\033[0mplaced a piece at (%d, %d)\n\033[42m", current_x, current_y);
     send_move(string_move(current_x, current_y, color), to_server);
     
-    printf("\n\n\n enemy count: %d\n", enemy_count);
-    printf("\n\n\n my count: %d\n", my_count);
+    printf("\n enemy count: %d\n", enemy_count);
+    printf("\n my count: %d\n", my_count);
 
     if ((my_count + enemy_count) == 64){ // game over bc board is full
       if (my_count > enemy_count){
-        printf("\n\n\nYOU WON!!\n");
+        printf("\nYOU WON!!\n");
       }
       else{
-        printf("\n\n\nYOU LOST!!\n");
+        printf("\nYOU LOST!!\n");
       }
       break;
     }
     if (!my_count){//0 pieces are your color
-      printf("\n\n\nYOU LOST!!\n");
+      printf("\nYOU LOST!!\n");
       break;
     }
     if (!enemy_count){//0 pieces are your color
-      printf("\n\n\nYOU WON!!\n");
+      printf("\nYOU WON!!\n");
       break;
     }
 	  moving = 0;

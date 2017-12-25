@@ -22,3 +22,7 @@ colors and illegal move detection work
 
 yiduoK -- 2017-12-24 20:25
 fixed the makefile so as to make it more organized; run make basic to make for now
+
+yiduoK -- 2017-12-24 22:43
+keeps track of number of pieces belonging to each side
+terminate the game as appropriate (every piece is the same color or board is full and one side has more pieces)
