@@ -44,6 +44,8 @@ int current_x = 0;
 int current_y = 0;
 
 static void sighandler(int signo) {
+  tcsetattr(0, TCSANOW, &initial_settings);
+  printf("\033[0m");
   char buffer[20];
   sprintf(buffer, "%d", getpid());
   remove(buffer);
@@ -279,7 +281,7 @@ void move(int from_server, int to_server){
   new_settings = initial_settings;
   new_settings.c_lflag &= ~ICANON;
   new_settings.c_lflag &= ~ECHO;
-  new_settings.c_lflag &= ~ISIG;
+  //new_settings.c_lflag &= ~ISIG;
   new_settings.c_cc[VMIN] = 0;
   new_settings.c_cc[VTIME] = 0;
     
