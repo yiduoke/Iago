@@ -33,8 +33,8 @@ char board[8][8];
 // color of player piece
 char color;
 
-int my_count = 0;
-int enemy_count = 0;
+int my_count = 2;
+int enemy_count = 2;
 
 struct termios initial_settings,
   new_settings;
@@ -89,26 +89,26 @@ void print_board(){
 }
 
 //prints current configuration of board[][]
-void update_board(){
-  int y;
-  int x;
-  for(y = 0; y < 8; y++){
-    for(x = 0; x < 8; x++){
-      gotoBoardXY(x, y);
-      if(board[y][x] == 'b') printf("\033[1;30m");
-      //if(board[y][x] == ' ') printf("\033[1;42m");
+// void update_board(){
+//   int y;
+//   int x;
+//   for(y = 0; y < 8; y++){
+//     for(x = 0; x < 8; x++){
+//       gotoBoardXY(x, y);
+//       if(board[y][x] == 'b') printf("\033[1;30m");
+//       //if(board[y][x] == ' ') printf("\033[1;42m");
 	
-      printf("%c", board[y][x]);
-    }
-  }
-}
+//       printf("%c", board[y][x]);
+//     }
+//   }
+// }
 
 //checks if (x,y) is in the board
 int inBounds(int x, int y){
   return x >= 0 && x < 8 && y >= 0 && y < 8;
 }
 
-//counts how many pieces would flip in a given direction if piece is places at (x,y)
+//counts how many pieces would flip in a given direction if piece is placed at (x,y)
 int conquer_count(int x, int y, int xDir, int yDir, char piece){
   int count = 0;
   x += xDir;
@@ -124,6 +124,7 @@ int conquer_count(int x, int y, int xDir, int yDir, char piece){
   }
 
   if(!inBounds(x,y) || board[y][x] != piece) count = 0;
+
   return count;
 }
 
@@ -159,10 +160,20 @@ void conquer_pieces(int x, int y, char piece){
       int newY = y;
       
       while(count){
-	newX += xDir;
-	newY += yDir;
-	place_piece(newX, newY, piece);
-	count--;
+	      newX += xDir;
+	      newY += yDir;
+	      place_piece(newX, newY, piece);
+        count--;
+
+        // for game termination purposes
+        if (piece == color){
+          my_count++;
+          enemy_count--;
+        }
+        else{
+          my_count--;
+          enemy_count++;
+        }
       }
     }
   }
@@ -260,14 +271,16 @@ void move(int from_server, int to_server){
   while(1){
     if(!moving){
       char move[3];
-      read(from_server, move, 3);
+      read(from_server, move, 3); //receiving enemy move
       
       color = 'b';
       if(move[2] == 'b') color = 'w';
       
       gotoBoardXY(0,9);
       make_move(move);
-      enemy_count++;
+      if (strncmp("33w", move, 3)){ //not the dummy move, safely increment
+        enemy_count++;
+      }
       printf("\n\n\nenemy count: %d\n", enemy_count);
       show_legals();
       moving = 1;
