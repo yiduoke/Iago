@@ -30,8 +30,11 @@
 //2D array representation of the board initialization
 char board[8][8];
 
-//
+// color of player piece
 char color;
+
+int my_count = 0;
+int enemy_count = 0;
 
 struct termios initial_settings,
   new_settings;
@@ -41,9 +44,9 @@ int current_y = 0;
 
 static void sighandler(int signo) {
   if (signo == SIGINT) {
-    // char buffer[HANDSHAKE_BUFFER_SIZE];
-    // sprintf(buffer, "%d", getpid());
-    // remove(buffer);
+    char buffer[HANDSHAKE_BUFFER_SIZE];
+    sprintf(buffer, "%d", getpid());
+    remove(buffer);
     exit(0);
   }
 }
@@ -293,12 +296,31 @@ void move(int from_server, int to_server){
       }
       else if(key == ' '){
 	if(isLegal(current_x, current_y, color)){
-	  place_piece(current_x, current_y, color);
+    place_piece(current_x, current_y, color);
+    my_count++;
 	  conquer_pieces(current_x, current_y, color);
 	  hide_legals();
 	  gotoBoardXY(0,9);
 	  printf("\033[0mplaced a piece at (%d, %d)\n\033[42m", current_x, current_y);
-	  send_move(string_move(current_x, current_y, color), to_server);
+    send_move(string_move(current_x, current_y, color), to_server);
+    
+    if ((my_count + enemy_count) == 64){ // game over bc board is full
+      if (my_count > enemy_count){
+        printf("\n\n\nYOU WON!!\n");
+      }
+      else{
+        printf("\n\n\nYOU LOST!!\n");
+      }
+      break;
+    }
+    if (!my_count){//0 pieces are your color
+      printf("\n\n\nYOU LOST!!\n");
+      break;
+    }
+    if (!enemy_count){//0 pieces are your color
+      printf("\n\n\nYOU WON!!\n");
+      break;
+    }
 	  moving = 0;
 	}
 	else{
