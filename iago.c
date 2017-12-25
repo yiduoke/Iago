@@ -53,7 +53,27 @@ static void sighandler(int signo) {
 
 // change a piece of on the board
 void place_piece(int x, int y, char piece){
+  if (board[y][x]==' '){ //the piece is placed on an empty spot
+    if (piece == color){
+      my_count++;
+    }
+    else{
+      enemy_count++;
+    }
+  }
+  else{// the spot is not empty
+    if (board[y][x]==color){// if that spot is gonna be turned over to the enemy
+      my_count--;
+      enemy_count++;
+    }
+    else{//the spot is turned over from the enemy into me
+      my_count++;
+      enemy_count--;
+    }
+  }
+
   board[y][x] = piece;
+
   gotoBoardXY(x,y);
   if(piece == 'b') printf("\033[30mb");
   if(piece == 'w') printf("\033[97mw");
@@ -166,14 +186,6 @@ void conquer_pieces(int x, int y, char piece){
         count--;
 
         // for game termination purposes
-        if (piece == color){
-          my_count++;
-          enemy_count--;
-        }
-        else{
-          my_count--;
-          enemy_count++;
-        }
       }
     }
   }
@@ -278,12 +290,6 @@ void move(int from_server, int to_server){
       
       gotoBoardXY(0,9);
       make_move(move);
-      int x = move[0] - '0';
-      int y = move[1] - '0';
-      if (board[y][x]!=' '){ //not a dummy move, safely increment
-        enemy_count++;
-        printf("\n\n\n\nnot a dummy move\n\n");
-      }
       printf("\n\n\nenemy count: %d\n", enemy_count);
       show_legals();
       moving = 1;
@@ -293,31 +299,30 @@ void move(int from_server, int to_server){
     if(n != EOF){
       key = n;
       if(key == UP){
-	move_up();
-	gotoBoardXY(0,9);
-	clearLine();
+	      move_up();
+	      gotoBoardXY(0,9);
+	      clearLine();
       }
       else if(key == DOWN){
-	move_down();
-	gotoBoardXY(0,9);
-	clearLine();
+        move_down();
+        gotoBoardXY(0,9);
+        clearLine();
       }
       else if(key == RIGHT){
-	move_right();
-	gotoBoardXY(0,9);
-	clearLine();
+        move_right();
+        gotoBoardXY(0,9);
+        clearLine();
       }
       else if(key == LEFT){
-	move_left();
-	gotoBoardXY(0,9);
-	clearLine();
+        move_left();
+        gotoBoardXY(0,9);
+        clearLine();
       }
       else if(key == ' '){
 	if(isLegal(current_x, current_y, color)){
     place_piece(current_x, current_y, color);
-    my_count++;
+    conquer_pieces(current_x, current_y, color);
     printf("\n\n\nmy count: %d\n", my_count);
-	  conquer_pieces(current_x, current_y, color);
 	  hide_legals();
 	  gotoBoardXY(0,9);
 	  printf("\033[0mplaced a piece at (%d, %d)\n\033[42m", current_x, current_y);
