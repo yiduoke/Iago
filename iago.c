@@ -57,7 +57,7 @@ void place_piece(int x, int y, char piece){
   // place_piece(3,4,'b');
   // place_piece(4,3,'b');
   // place_piece(4,4,'w');
-  if (board[y][x]==' ' && !(x==3 && y==3) && !(x==3 && y==4) && !(x==4 && y==3) && !(x==4 && y==4)){ //the piece is placed on an empty spot. also makes sure it's not an initialization move
+  if (board[y][x]==' '){ //the piece is placed on an empty spot
     if (piece == color){
       my_count++;
     }
@@ -99,6 +99,9 @@ void initialize(){
   place_piece(3,4,'b');
   place_piece(4,3,'b');
   place_piece(4,4,'w');
+
+  my_count = 2;
+  enemy_count = 2;
 }
 
 //prints empty board
