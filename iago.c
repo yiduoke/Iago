@@ -41,9 +41,9 @@ int current_y = 0;
 
 static void sighandler(int signo) {
   if (signo == SIGINT) {
-    char buffer[HANDSHAKE_BUFFER_SIZE];
-    sprintf(buffer, "%d", getpid());
-    remove(buffer);
+    // char buffer[HANDSHAKE_BUFFER_SIZE];
+    // sprintf(buffer, "%d", getpid());
+    // remove(buffer);
     exit(0);
   }
 }
