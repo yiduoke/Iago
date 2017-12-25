@@ -335,6 +335,9 @@ void move(int from_server, int to_server){
 	  printf("\033[0mplaced a piece at (%d, %d)\n\033[42m", current_x, current_y);
     send_move(string_move(current_x, current_y, color), to_server);
     
+    printf("\n\n\n enemy count: %d\n", enemy_count);
+    printf("\n\n\n my count: %d\n", my_count);
+
     if ((my_count + enemy_count) == 64){ // game over bc board is full
       if (my_count > enemy_count){
         printf("\n\n\nYOU WON!!\n");
@@ -366,7 +369,6 @@ void move(int from_server, int to_server){
     }
 
     gotoBoardXY(current_x, current_y);
-    printf("\n\n\n enemy count: %d\n", enemy_count);
   }
   tcsetattr(0, TCSANOW, &initial_settings);
 }
