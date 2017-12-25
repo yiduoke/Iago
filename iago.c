@@ -10,6 +10,7 @@
 #include <sys/shm.h>
 #include <errno.h>
 #include <termios.h>
+#include <signal.h>
 #include "pipe_networking.h"
 
 #define clear() printf("\033[2J");
@@ -45,12 +46,12 @@ int current_y = 0;
 int num_legals = 0;
 
 static void sighandler(int signo) {
-  if (signo == SIGINT) {
-    char buffer[HANDSHAKE_BUFFER_SIZE];
-    sprintf(buffer, "%d", getpid());
-    remove(buffer);
-    exit(0);
-  }
+  tcsetattr(0, TCSANOW, &initial_settings);
+  printf("\033[0m");
+  char buffer[20];
+  sprintf(buffer, "%d", getpid());
+  remove(buffer);
+  exit(1);
 }
 
 // change a piece of on the board
@@ -187,11 +188,10 @@ void conquer_pieces(int x, int y, char piece){
       int newY = y;
       
       while(count){
-	      newX += xDir;
-	      newY += yDir;
-	      place_piece(newX, newY, piece);
-        count--;
-
+	newX += xDir;
+	newY += yDir;
+	place_piece(newX, newY, piece);
+	count--;
         // for game termination purposes
       }
     }
@@ -271,7 +271,6 @@ void hide_legals(){
 
 //handles user inputs
 void move(int from_server, int to_server){
-  signal(SIGINT, sighandler);  
   char *input = (char *)calloc(1, 100);//when in doubt, calloc is always the answer
   int n; 
   unsigned char key;
@@ -281,7 +280,7 @@ void move(int from_server, int to_server){
   new_settings = initial_settings;
   new_settings.c_lflag &= ~ICANON;
   new_settings.c_lflag &= ~ECHO;
-  new_settings.c_lflag &= ~ISIG;
+  //new_settings.c_lflag &= ~ISIG;
   new_settings.c_cc[VMIN] = 0;
   new_settings.c_cc[VTIME] = 0;
     
@@ -298,95 +297,113 @@ void move(int from_server, int to_server){
       
       gotoBoardXY(0,9);
       make_move(move);
-      num_legals = 0;
+
+      if ((my_count + enemy_count) == 64){ // game over bc board is full
+	if (my_count > enemy_count){
+	  gotoBoardXY(0,11);
+	  printf("\033[0mYOU WON!!\n");
+	}
+	else{
+	  gotoBoardXY(0,11);
+	  printf("\033[0mYOU LOST!!\n");
+	}
+	break;
+      }
+      if (!my_count){//0 pieces are your color
+	gotoBoardXY(0,11);
+	printf("\033[0mYOU WON!!\n");
+	break;
+      }
+      if (!enemy_count){//0 pieces are your color
+	gotoBoardXY(0,11);
+	printf("\033[0mYOU WON!!\n");
+	break;
+      }
+	  
       show_legals();
+      gotoBoardXY(0,10);
+      printf("\033[0mmy count: %d, enemy count: %d\033[42m\n", my_count, enemy_count);
       moving = 1;
     }
 
-    //printf("# of legal moves: %d\n", num_legals);
-    if (moving && !num_legals){// no legal moves
-      //printf("your turn will be skipped because there are no legal moves\n");
-      //sleep(2);
-      char move[3];
-      sprintf(move, "%d%d%c", 3, 3, board[3][3]);
-      send_move(move, to_server);
-      moving = 0;
-    }
-    else if(moving){ // there are legal moves
-      n = getchar();
-      if(n != EOF){
-        key = n;
-        if(key == UP){
-          move_up();
-          gotoBoardXY(0,9);
-          clearLine();
-        }
-        else if(key == DOWN){
-          move_down();
-          gotoBoardXY(0,9);
-          clearLine();
-        }
-        else if(key == RIGHT){
-          move_right();
-          gotoBoardXY(0,9);
-          clearLine();
-        }
-        else if(key == LEFT){
-          move_left();
-          gotoBoardXY(0,9);
-          clearLine();
-        }
-        else if(key == ' '){
-          if(isLegal(current_x, current_y, color)){
-            place_piece(current_x, current_y, color);
-            conquer_pieces(current_x, current_y, color);
-            hide_legals();
-            gotoBoardXY(0,9);
-            printf("\033[0mplaced a piece at (%d, %d)\n\033[42m", current_x, current_y);
-            send_move(string_move(current_x, current_y, color), to_server);
-        
-            moving = 0;
-          }
-          else{
-            gotoBoardXY(0,9);
-            printf("\033[0mcan't place a piece at (%d, %d)\033[42m", current_x, current_y);
-          }
-        }
-        else if(key == QUIT){
-          printf("\033[0myou rage quit\n");
-          break;
-        }
+    signal(SIGINT, sighandler);
+    
+    n = getchar();
+    if(n != EOF){
+      key = n;
+      if(key == UP){
+	move_up();
+	gotoBoardXY(0,9);
+	clearLine();
       }
-    }
-    //printf("\n enemy count: %d\n", enemy_count);
-    //printf("\n my count: %d\n", my_count);
+      else if(key == DOWN){
+        move_down();
+        gotoBoardXY(0,9);
+        clearLine();
+      }
+      else if(key == RIGHT){
+        move_right();
+        gotoBoardXY(0,9);
+        clearLine();
+      }
+      else if(key == LEFT){
+        move_left();
+        gotoBoardXY(0,9);
+        clearLine();
+      }
+      else if(key == ' '){
+	if(isLegal(current_x, current_y, color)){
+	  place_piece(current_x, current_y, color);
+	  conquer_pieces(current_x, current_y, color);
+	  hide_legals();
+	  gotoBoardXY(0,9);
+	  printf("\033[0mplaced a piece at (%d, %d)\033[42m\n", current_x, current_y);
+	  send_move(string_move(current_x, current_y, color), to_server);
 
-    if ((my_count + enemy_count) == 64){ // game over bc board is full
-      if (my_count > enemy_count){
-	printf("\nYOU WON!!\n");
+	  gotoBoardXY(0,10);
+	  printf("\033[0mmy count: %d, enemy count: %d\033[42m\n", my_count, enemy_count);
+
+	  if ((my_count + enemy_count) == 64){ // game over bc board is full
+	    if (my_count > enemy_count){
+	      gotoBoardXY(0,11);
+	      printf("\033[0mYOU WON!!\n");
+	    }
+	    else{
+	      gotoBoardXY(0,11);
+	      printf("\033[0mYOU LOST!!\n");
+	    }
+	    break;
+	  }
+	  if (!my_count){//0 pieces are your color
+	    gotoBoardXY(0,11);
+	    printf("\033[0mYOU WON!!\n");
+	    break;
+	  }
+	  if (!enemy_count){//0 pieces are your color
+	    gotoBoardXY(0,11);
+	    printf("\033[0mYOU WON!!\n");
+	    break;
+	  }
+	  moving = 0;
+	}
+	else{
+	  gotoBoardXY(0,9);
+	  printf("\033[0mcan't place a piece at (%d, %d)\033[42m\n", current_x, current_y);
+	}
       }
-      else{
-	printf("\nYOU LOST!!\n");
+      else if(key == QUIT){
+	printf("\033[0myou rage quit\n");
+	break;
       }
-      break;
     }
-    if (!my_count){//0 pieces are your color
-      printf("\nYOU LOST!!\n");
-      break;
-    }
-    if (!enemy_count){//0 pieces are enemy's color
-      printf("\nYOU WON!!\n");
-      break;
-    }
-    //num_legals = 0;
+
     gotoBoardXY(current_x, current_y);
   }
   tcsetattr(0, TCSANOW, &initial_settings);
 }
 
 int main(){
-  //signal(SIGINT, sighandler);
-
+  signal(SIGINT, sighandler);
   int to_server;
   int from_server;
   
