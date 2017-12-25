@@ -248,8 +248,8 @@ void show_legals(){
     for(x = 0; x < 8; x++){
       if (isLegal(x, y, color)){
         num_legals++;
-	      gotoBoardXY(x, y);
-	      printf("\033[103m \033[0m");
+	gotoBoardXY(x, y);
+	printf("\033[103m \033[0m");
       }
     }
   }
@@ -298,17 +298,21 @@ void move(int from_server, int to_server){
       
       gotoBoardXY(0,9);
       make_move(move);
+      num_legals = 0;
       show_legals();
       moving = 1;
     }
 
-    printf("# of legal moves: %d\n", num_legals);
-    if (!num_legals){// no legal moves
-      printf("your turn will be skipped because there are no legal moves\n");
-      sleep(2);
-      send_move("33w", to_server);
+    //printf("# of legal moves: %d\n", num_legals);
+    if (moving && !num_legals){// no legal moves
+      //printf("your turn will be skipped because there are no legal moves\n");
+      //sleep(2);
+      char move[3];
+      sprintf(move, "%d%d%c", 3, 3, board[3][3]);
+      send_move(move, to_server);
+      moving = 0;
     }
-    else{ // there are legal moves
+    else if(moving){ // there are legal moves
       n = getchar();
       if(n != EOF){
         key = n;
@@ -354,17 +358,15 @@ void move(int from_server, int to_server){
         }
       }
     }
-
-    
-    printf("\n enemy count: %d\n", enemy_count);
-    printf("\n my count: %d\n", my_count);
+    //printf("\n enemy count: %d\n", enemy_count);
+    //printf("\n my count: %d\n", my_count);
 
     if ((my_count + enemy_count) == 64){ // game over bc board is full
       if (my_count > enemy_count){
-        printf("\nYOU WON!!\n");
+	printf("\nYOU WON!!\n");
       }
       else{
-        printf("\nYOU LOST!!\n");
+	printf("\nYOU LOST!!\n");
       }
       break;
     }
@@ -376,15 +378,14 @@ void move(int from_server, int to_server){
       printf("\nYOU WON!!\n");
       break;
     }
-    
-    num_legals = 0;
+    //num_legals = 0;
     gotoBoardXY(current_x, current_y);
   }
   tcsetattr(0, TCSANOW, &initial_settings);
 }
 
 int main(){
-  signal(SIGINT, sighandler);
+  //signal(SIGINT, sighandler);
 
   int to_server;
   int from_server;
@@ -394,8 +395,7 @@ int main(){
   clear();
   gotoxy(0,0);
   print_board();
-  initialize();
-  
+  initialize();  
   
   move(from_server, to_server);
 }
