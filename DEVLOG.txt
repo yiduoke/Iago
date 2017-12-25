@@ -29,3 +29,6 @@ terminate the game as appropriate (every piece is the same color or board is ful
 
 mdA -- 2017-12-25 16:46
 fixed displaying of current piece counts and win/loss messages
+
+yiduoK -- 2017-12-25 17:15
+signal handling so either player can quit any time
