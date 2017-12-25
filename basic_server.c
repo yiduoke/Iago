@@ -22,27 +22,31 @@ int main() {
   from_client = server_handshake( &to_client );
   from_client2 = server_handshake2( &to_client2 );
   
+<<<<<<< HEAD
   write(to_client, "start", 5);
+=======
+  write(to_client, "33w", 3);
+>>>>>>> origin/md
   printf("initiated\n");
   
   int turn = 0;
   
   while(1){
     if(turn % 2 == 0){
-      char modifying[1024];
-      read(from_client, modifying, sizeof(modifying));
-      printf("got %s from client1\n", modifying);
+      char move[3];
+      read(from_client, move, sizeof(move));
+      printf("got move from client1\n");
   
-      write(to_client2, modifying, sizeof(modifying));
-      printf("done sending text to client2\n");
+      write(to_client2, move, sizeof(move));
+      printf("done sending move to client2\n");
     }
     else{
-      char modifying[1024];
-      read(from_client2, modifying, sizeof(modifying));
-      printf("got %s from client after handshake\n", modifying);
+      char move[3];
+      read(from_client2, move, sizeof(move));
+      printf("got move from client2\n");
   
-      write(to_client, modifying, sizeof(modifying));
-      printf("done sending text to client1\n");
+      write(to_client, move, sizeof(move));
+      printf("done sending move to client1\n");
     }
     turn++;
   }

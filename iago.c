@@ -42,6 +42,9 @@
 //2D array representation of the board initialization
 char board[8][8];
 
+//
+char color;
+
 struct termios initial_settings,
   new_settings;
 
@@ -79,6 +82,7 @@ void print_board(){
   int file = open("board.txt", O_RDONLY);
   char buffer[1024];
   read(file, buffer, sizeof(buffer));
+  close(file);
   printf("%s", buffer);
 
   //printf("\033[0m");
@@ -195,31 +199,51 @@ char *string_move(int x, int y, char piece){
 }
 
 void make_move(char *move){
-  if(move){
-    int x = move[0] - '0';
-    int y = move[1] - '0';
-    char piece = move[2];
-    place_piece(x,y,piece);
-    conquer_pieces(x,y,piece);
-  }
+  int x = move[0] - '0';
+  int y = move[1] - '0';
+  char piece = move[2];
+  place_piece(x,y,piece);
+  conquer_pieces(x,y,piece);
 }
 
 void send_move(char *move, int to_server){
   write(to_server, move, 3);
 }
 
-//handles user inputs
-void move(int from_server, int to_server){
-  char move[3];
-  read(from_server, move, sizeof(move));
-  gotoBoardXY(0,9);
-  printf("\033[0mmove received: %s\033[42m", move);
-  make_move(move);
+void show_legals(){
+  int y;
+  int x;
   
-  char *input = (char *)calloc(1, 1024);//when in doubt, calloc is always the answer
+  for(y = 0; y < 8; y++){
+    for(x = 0; x < 8; x++){
+      if (isLegal(x, y, color)){
+	gotoBoardXY(x, y);
+	printf("\033[103m \033[0m");
+      }
+    }
+  }
+}
+
+void hide_legals(){
+  int y;
+  int x;
+  
+  for(y = 0; y < 8; y++){
+    for(x = 0; x < 8; x++){
+      if (board[y][x] == ' '){
+	gotoBoardXY(x, y);
+	printf("\033[42m ");
+      }
+    }
+  }
+}
+
+//handles user inputs
+void move(int from_server, int to_server){  
+  char *input = (char *)calloc(1, 100);//when in doubt, calloc is always the answer
   int n; 
   unsigned char key;
-
+  
   tcgetattr(0,&initial_settings);
     
   new_settings = initial_settings;
@@ -230,8 +254,22 @@ void move(int from_server, int to_server){
   new_settings.c_cc[VTIME] = 0;
     
   tcsetattr(0, TCSANOW, &new_settings);
-    
+  
+  int moving = 0;
   while(1){
+    if(!moving){
+      char move[3];
+      read(from_server, move, 3);
+      
+      color = 'b';
+      if(move[2] == 'b') color = 'w';
+      
+      gotoBoardXY(0,9);
+      make_move(move);
+      show_legals();
+      moving = 1;
+    }
+    
     n = getchar();
     if(n != EOF){
       key = n;
@@ -255,34 +293,19 @@ void move(int from_server, int to_server){
 	gotoBoardXY(0,9);
 	clearLine();
       }
-      else if(key == 'm'){
-	make_move("66w");
-	gotoBoardXY(0,9);
-	printf("\033[0mmade move\033[42m");
-      }
-      else if(key == B){
-	if(isLegal(current_x, current_y, 'b')){
-	  place_piece(current_x, current_y, 'b');
-	  conquer_pieces(current_x, current_y, 'b');
+      else if(key == ' '){
+	if(isLegal(current_x, current_y, color)){
+	  place_piece(current_x, current_y, color);
+	  conquer_pieces(current_x, current_y, color);
+	  hide_legals();
 	  gotoBoardXY(0,9);
-	  printf("\033[0mplaced a black piece at (%d, %d) string move: %s\033[42m", current_x, current_y, string_move(current_x, current_y, 'b'));
-	  send_move(string_move(current_x, current_y, 'b'), to_server);
+	  printf("\033[0mplaced a piece at (%d, %d)\n\033[42m", current_x, current_y);
+	  send_move(string_move(current_x, current_y, color), to_server);
+	  moving = 0;
 	}
 	else{
 	  gotoBoardXY(0,9);
-	  printf("\033[0mcan't place a black piece at (%d, %d)\033[42m", current_x, current_y);
-	}
-      }
-      else if(key == W){
-	if(isLegal(current_x, current_y, 'w')){
-	  place_piece(current_x, current_y, 'w');
-	  conquer_pieces(current_x, current_y, 'w');
-	  gotoBoardXY(0, 9);
-	  printf("\033[0mplaced a white piece at (%d, %d) move string: %s\033[42m", current_x, current_y, string_move(current_x, current_y, 'w'));
-	}
-	else{
-	  gotoBoardXY(0,9);
-	  printf("\033[0mcan't place a white piece at (%d, %d)\033[42m", current_x, current_y);
+	  printf("\033[0mcan't place a piece at (%d, %d)\033[42m", current_x, current_y);
 	}
       }
       else if(key == QUIT){
@@ -341,12 +364,14 @@ int client_handshake(int *to_server) {
 int main(){
   int to_server;
   int from_server;
-
+  
   from_server = client_handshake( &to_server );
-
+  
+  clear();
   gotoxy(0,0);
   print_board();
   initialize();
-
+  
+  
   move(from_server, to_server);
 }
