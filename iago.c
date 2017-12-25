@@ -299,7 +299,7 @@ void move(int from_server, int to_server){
       
       gotoBoardXY(0,9);
       make_move(move);
-      printf("\n\n\nenemy count: %d\n", enemy_count);
+      printf("\n\n\n enemy count: %d\n", enemy_count);
       show_legals();
       moving = 1;
     }
@@ -331,7 +331,7 @@ void move(int from_server, int to_server){
 	if(isLegal(current_x, current_y, color)){
     place_piece(current_x, current_y, color);
     conquer_pieces(current_x, current_y, color);
-    printf("\n\n\nmy count: %d\n", my_count);
+    printf("\n\n\n    my count: %d\n", my_count);
 	  hide_legals();
 	  gotoBoardXY(0,9);
 	  printf("\033[0mplaced a piece at (%d, %d)\n\033[42m", current_x, current_y);
