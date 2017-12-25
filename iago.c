@@ -278,8 +278,11 @@ void move(int from_server, int to_server){
       
       gotoBoardXY(0,9);
       make_move(move);
-      if (strncmp("33w", move, 3)){ //not the dummy move, safely increment
+      int x = move[0] - '0';
+      int y = move[1] - '0';
+      if (board[y][x]!=' '){ //not a dummy move, safely increment
         enemy_count++;
+        printf("\n\n\n\nnot a dummy move\n\n");
       }
       printf("\n\n\nenemy count: %d\n", enemy_count);
       show_legals();
