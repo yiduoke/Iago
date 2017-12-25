@@ -39,7 +39,16 @@ struct termios initial_settings,
 int current_x = 0;
 int current_y = 0;
 
-//changes a piece of board[][]
+static void sighandler(int signo) {
+  if (signo == SIGINT) {
+    char buffer[HANDSHAKE_BUFFER_SIZE];
+    sprintf(buffer, "%d", getpid());
+    remove(buffer);
+    exit(0);
+  }
+}
+
+// change a piece of on the board
 void place_piece(int x, int y, char piece){
   board[y][x] = piece;
   gotoBoardXY(x,y);
@@ -227,7 +236,8 @@ void hide_legals(){
 }
 
 //handles user inputs
-void move(int from_server, int to_server){  
+void move(int from_server, int to_server){
+  signal(SIGINT, sighandler);  
   char *input = (char *)calloc(1, 100);//when in doubt, calloc is always the answer
   int n; 
   unsigned char key;
@@ -307,18 +317,9 @@ void move(int from_server, int to_server){
   tcsetattr(0, TCSANOW, &initial_settings);
 }
 
-static void sighandler(int signo) {
-  if (signo == SIGINT) {
-    char buffer[HANDSHAKE_BUFFER_SIZE];
-    sprintf(buffer, "%d", getpid());
-    remove(buffer);
-    exit(0);
-  }
-}
-
 int main(){
   signal(SIGINT, sighandler);
-  
+
   int to_server;
   int from_server;
   
