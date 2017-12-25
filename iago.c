@@ -377,6 +377,7 @@ void move(int from_server, int to_server){
       break;
     }
     
+    num_legals = 0;
     gotoBoardXY(current_x, current_y);
   }
   tcsetattr(0, TCSANOW, &initial_settings);
