@@ -62,13 +62,15 @@ void place_piece(int x, int y, char piece){
     }
   }
   else{// the spot is not empty
-    if (board[y][x]==color){// if that spot is gonna be turned over to the enemy
-      my_count--;
-      enemy_count++;
-    }
-    else{//the spot is turned over from the enemy into me
-      my_count++;
-      enemy_count--;
+    if (board[y][x] != piece){
+      if (board[y][x]==color){// if that spot is gonna be turned over to the enemy
+        my_count--;
+        enemy_count++;
+      }
+      else{//the spot is turned over from the enemy into me
+        my_count++;
+        enemy_count--;
+      }
     }
   }
 
