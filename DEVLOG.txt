@@ -26,3 +26,6 @@ fixed the makefile so as to make it more organized; run make basic to make for n
 yiduoK -- 2017-12-24 22:43
 keeps track of number of pieces belonging to each side
 terminate the game as appropriate (every piece is the same color or board is full and one side has more pieces)
+
+mdA -- 2017-12-25 16:46
+fixed displaying of current piece counts and win/loss messages

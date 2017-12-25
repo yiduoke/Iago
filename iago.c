@@ -10,6 +10,7 @@
 #include <sys/shm.h>
 #include <errno.h>
 #include <termios.h>
+#include <signal.h>
 #include "pipe_networking.h"
 
 #define clear() printf("\033[2J");
@@ -43,12 +44,10 @@ int current_x = 0;
 int current_y = 0;
 
 static void sighandler(int signo) {
-  if (signo == SIGINT) {
-    char buffer[HANDSHAKE_BUFFER_SIZE];
-    sprintf(buffer, "%d", getpid());
-    remove(buffer);
-    exit(0);
-  }
+  char buffer[20];
+  sprintf(buffer, "%d", getpid());
+  remove(buffer);
+  exit(1);
 }
 
 // change a piece of on the board
@@ -189,11 +188,10 @@ void conquer_pieces(int x, int y, char piece){
       int newY = y;
       
       while(count){
-	      newX += xDir;
-	      newY += yDir;
-	      place_piece(newX, newY, piece);
-        count--;
-
+	newX += xDir;
+	newY += yDir;
+	place_piece(newX, newY, piece);
+	count--;
         // for game termination purposes
       }
     }
@@ -272,7 +270,6 @@ void hide_legals(){
 
 //handles user inputs
 void move(int from_server, int to_server){
-  signal(SIGINT, sighandler);  
   char *input = (char *)calloc(1, 100);//when in doubt, calloc is always the answer
   int n; 
   unsigned char key;
@@ -299,17 +296,44 @@ void move(int from_server, int to_server){
       
       gotoBoardXY(0,9);
       make_move(move);
+
+      if ((my_count + enemy_count) == 64){ // game over bc board is full
+	if (my_count > enemy_count){
+	  gotoBoardXY(0,11);
+	  printf("\033[0mYOU WON!!\n");
+	}
+	else{
+	  gotoBoardXY(0,11);
+	  printf("\033[0mYOU LOST!!\n");
+	}
+	break;
+      }
+      if (!my_count){//0 pieces are your color
+	gotoBoardXY(0,11);
+	printf("\033[0mYOU WON!!\n");
+	break;
+      }
+      if (!enemy_count){//0 pieces are your color
+	gotoBoardXY(0,11);
+	printf("\033[0mYOU WON!!\n");
+	break;
+      }
+	  
       show_legals();
+      gotoBoardXY(0,10);
+      printf("\033[0mmy count: %d, enemy count: %d\033[42m\n", my_count, enemy_count);
       moving = 1;
     }
+
+    signal(SIGINT, sighandler);
     
     n = getchar();
     if(n != EOF){
       key = n;
       if(key == UP){
-	      move_up();
-	      gotoBoardXY(0,9);
-	      clearLine();
+	move_up();
+	gotoBoardXY(0,9);
+	clearLine();
       }
       else if(key == DOWN){
         move_down();
@@ -328,38 +352,42 @@ void move(int from_server, int to_server){
       }
       else if(key == ' '){
 	if(isLegal(current_x, current_y, color)){
-    place_piece(current_x, current_y, color);
-    conquer_pieces(current_x, current_y, color);
+	  place_piece(current_x, current_y, color);
+	  conquer_pieces(current_x, current_y, color);
 	  hide_legals();
 	  gotoBoardXY(0,9);
-	  printf("\033[0mplaced a piece at (%d, %d)\n\033[42m", current_x, current_y);
-    send_move(string_move(current_x, current_y, color), to_server);
-    
-    printf("\n\n\n enemy count: %d\n", enemy_count);
-    printf("\n\n\n my count: %d\n", my_count);
+	  printf("\033[0mplaced a piece at (%d, %d)\033[42m\n", current_x, current_y);
+	  send_move(string_move(current_x, current_y, color), to_server);
 
-    if ((my_count + enemy_count) == 64){ // game over bc board is full
-      if (my_count > enemy_count){
-        printf("\n\n\nYOU WON!!\n");
-      }
-      else{
-        printf("\n\n\nYOU LOST!!\n");
-      }
-      break;
-    }
-    if (!my_count){//0 pieces are your color
-      printf("\n\n\nYOU LOST!!\n");
-      break;
-    }
-    if (!enemy_count){//0 pieces are your color
-      printf("\n\n\nYOU WON!!\n");
-      break;
-    }
+	  gotoBoardXY(0,10);
+	  printf("\033[0mmy count: %d, enemy count: %d\033[42m\n", my_count, enemy_count);
+
+	  if ((my_count + enemy_count) == 64){ // game over bc board is full
+	    if (my_count > enemy_count){
+	      gotoBoardXY(0,11);
+	      printf("\033[0mYOU WON!!\n");
+	    }
+	    else{
+	      gotoBoardXY(0,11);
+	      printf("\033[0mYOU LOST!!\n");
+	    }
+	    break;
+	  }
+	  if (!my_count){//0 pieces are your color
+	    gotoBoardXY(0,11);
+	    printf("\033[0mYOU WON!!\n");
+	    break;
+	  }
+	  if (!enemy_count){//0 pieces are your color
+	    gotoBoardXY(0,11);
+	    printf("\033[0mYOU WON!!\n");
+	    break;
+	  }
 	  moving = 0;
 	}
 	else{
 	  gotoBoardXY(0,9);
-	  printf("\033[0mcan't place a piece at (%d, %d)\033[42m", current_x, current_y);
+	  printf("\033[0mcan't place a piece at (%d, %d)\033[42m\n", current_x, current_y);
 	}
       }
       else if(key == QUIT){
@@ -375,7 +403,6 @@ void move(int from_server, int to_server){
 
 int main(){
   signal(SIGINT, sighandler);
-
   int to_server;
   int from_server;
   
