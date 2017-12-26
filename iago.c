@@ -124,7 +124,7 @@ void print_board(){
 //       gotoBoardXY(x, y);
 //       if(board[y][x] == 'b') printf("\033[1;30m");
 //       //if(board[y][x] == ' ') printf("\033[1;42m");
-	
+
 //       printf("%c", board[y][x]);
 //     }
 //   }
@@ -143,7 +143,7 @@ int conquer_count(int x, int y, int xDir, int yDir, char piece){
 
   char otherPiece = 'b';
   if(piece == 'b') otherPiece = 'w';
-  
+
   while(inBounds(x,y) && board[y][x] == otherPiece){
     x += xDir;
     y += yDir;
@@ -161,11 +161,11 @@ int isLegal(int x, int y, char piece){
 
   int xDir;
   int yDir;
-  
+
   for(yDir = -1; yDir < 2; yDir++){
     for(xDir = -1; xDir < 2; xDir++){
       if(xDir == 0 && yDir == 0) continue;
-      
+
       if(conquer_count(x,y,xDir,yDir, piece)) return 1;
     }
   }
@@ -177,15 +177,15 @@ int isLegal(int x, int y, char piece){
 void conquer_pieces(int x, int y, char piece){
   int xDir;
   int yDir;
-  
+
   for(yDir = -1; yDir < 2; yDir++){
     for(xDir = -1; xDir < 2; xDir++){
       if(xDir == 0 && yDir == 0) continue;
-      
+
       int count = conquer_count(x,y,xDir,yDir, piece);
       int newX = x;
       int newY = y;
-      
+
       while(count){
 	      newX += xDir;
 	      newY += yDir;
@@ -243,7 +243,7 @@ void send_move(char *move, int to_server){
 void show_legals(){
   int y;
   int x;
-  
+
   for(y = 0; y < 8; y++){
     for(x = 0; x < 8; x++){
       if (isLegal(x, y, color)){
@@ -258,7 +258,7 @@ void show_legals(){
 void hide_legals(){
   int y;
   int x;
-  
+
   for(y = 0; y < 8; y++){
     for(x = 0; x < 8; x++){
       if (board[y][x] == ' '){
@@ -271,35 +271,56 @@ void hide_legals(){
 
 //handles user inputs
 void move(int from_server, int to_server){
-  signal(SIGINT, sighandler);  
+  signal(SIGINT, sighandler);
   char *input = (char *)calloc(1, 100);//when in doubt, calloc is always the answer
-  int n; 
+  int n;
   unsigned char key;
-  
+
   tcgetattr(0,&initial_settings);
-    
+
   new_settings = initial_settings;
   new_settings.c_lflag &= ~ICANON;
   new_settings.c_lflag &= ~ECHO;
   // new_settings.c_lflag &= ~ISIG;
   new_settings.c_cc[VMIN] = 0;
   new_settings.c_cc[VTIME] = 0;
-    
+
   tcsetattr(0, TCSANOW, &new_settings);
-  
+
   int moving = 0;
   while(1){
     if(!moving){
       char move[3];
       read(from_server, move, 3); //receiving enemy move
-      
+
       color = 'b';
       if(move[2] == 'b') color = 'w';
-      
+
       gotoBoardXY(0,9);
       make_move(move);
       num_legals = 0;
       show_legals();
+
+      if (!num_legals && !strncmp("33", move, 2)){ // received a dummy move bc enemy had no legal moves
+        // AND I myself have no legal moves -- terminate the game
+        if ((my_count + enemy_count) == 64){ // game over bc board is full
+          if (my_count > enemy_count){
+            printf("\nYOU WON!!\n");
+          }
+          else{
+            printf("\nYOU LOST!!\n");
+          }
+          break;
+        }
+        if (!my_count){//0 pieces are your color
+          printf("\nYOU LOST!!\n");
+          break;
+        }
+        if (!enemy_count){//0 pieces are enemy's color
+          printf("\nYOU WON!!\n");
+          break;
+        }
+      }
       moving = 1;
     }
 
@@ -344,7 +365,7 @@ void move(int from_server, int to_server){
             gotoBoardXY(0,9);
             printf("\033[0mplaced a piece at (%d, %d)\n\033[42m", current_x, current_y);
             send_move(string_move(current_x, current_y, color), to_server);
-        
+
             moving = 0;
           }
           else{
@@ -363,10 +384,10 @@ void move(int from_server, int to_server){
 
     if ((my_count + enemy_count) == 64){ // game over bc board is full
       if (my_count > enemy_count){
-	printf("\nYOU WON!!\n");
+        printf("\nYOU WON!!\n");
       }
       else{
-	printf("\nYOU LOST!!\n");
+	      printf("\nYOU LOST!!\n");
       }
       break;
     }
@@ -389,13 +410,13 @@ int main(){
 
   int to_server;
   int from_server;
-  
+
   from_server = client_handshake( &to_server );
-  
+
   clear();
   gotoxy(0,0);
   print_board();
-  initialize();  
-  
+  initialize();
+
   move(from_server, to_server);
 }
