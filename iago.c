@@ -110,7 +110,7 @@ void print_board(){
   char buffer[1024];
   read(file, buffer, sizeof(buffer));
   close(file);
-  printf("%s\n", buffer);
+  printf("%s", buffer);
 
   //printf("\033[0m");
 }
@@ -305,19 +305,19 @@ void move(int from_server, int to_server){
         // AND I myself have no legal moves -- terminate the game
         if ((my_count + enemy_count) == 64){ // game over bc board is full
           if (my_count > enemy_count){
-            printf("\nYOU WON!!\n");
+            printf("\033[0mYOU WON!!\n");
           }
           else{
-            printf("\nYOU LOST!!\n");
+            printf("\033[0mYOU LOST!!\n");
           }
           break;
         }
         if (!my_count){//0 pieces are your color
-          printf("\nYOU LOST!!\n");
+          printf("\033[0mYOU LOST!!\n");
           break;
         }
         if (!enemy_count){//0 pieces are enemy's color
-          printf("\nYOU WON!!\n");
+          printf("\033[0mYOU WON!!\n");
           break;
         }
       }
@@ -384,19 +384,19 @@ void move(int from_server, int to_server){
 
     if ((my_count + enemy_count) == 64){ // game over bc board is full
       if (my_count > enemy_count){
-        printf("\nYOU WON!!\n");
+        printf("\033[0mYOU WON!!\n");
       }
       else{
-	      printf("\nYOU LOST!!\n");
+	      printf("\033[0mYOU LOST!!\n");
       }
       break;
     }
     if (!my_count){//0 pieces are your color
-      printf("\nYOU LOST!!\n");
+      printf("\033[0mYOU LOST!!\n");
       break;
     }
     if (!enemy_count){//0 pieces are enemy's color
-      printf("\nYOU WON!!\n");
+      printf("\033[0mYOU WON!!\n");
       break;
     }
     //num_legals = 0;
