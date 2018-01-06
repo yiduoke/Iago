@@ -36,6 +36,12 @@ char color;
 int my_count = 2;
 int enemy_count = 2;
 
+// shared memory stuff
+int KEY = ftok("makefile",2);
+int mem_des;
+int* pointer;
+int fd; // for chat.txt
+
 struct termios initial_settings,
   new_settings;
 
@@ -43,6 +49,26 @@ int current_x = 0;
 int current_y = 0;
 
 int num_legals = 0;
+
+void create_mem(){
+  mem_des = shmget(KEY, sizeof(char), IPC_CREAT | IPC_EXCL | 0777);
+  if (mem_des < 0){
+    printf("failed to create shared memory\n");
+    exit(0);
+  }
+
+  pointer = (int*)shmat(mem_des,0,0);
+  if (pointer<0){
+    printf("failed to attach shared memory\n");
+    exit(0);
+  }
+
+  *pointer = 0;
+  if (shmdt(pointer) < 0){
+    printf("failed to detached shared memory\n");
+    exit(0);
+  }
+}
 
 static void sighandler(int signo) {
   tcsetattr(0, TCSANOW, &initial_settings);
