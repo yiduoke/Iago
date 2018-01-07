@@ -63,11 +63,12 @@ void create_mem(){
     exit(0);
   }
 
-  *pointer = 0;
+  *pointer = 'b';
   if (shmdt(pointer) < 0){
     printf("failed to detached shared memory\n");
     exit(0);
   }
+  printf("just created: %c in shared memory\n", *pointer);
 }
 
 static void sighandler(int signo) {
@@ -137,24 +138,8 @@ void print_board(){
   read(file, buffer, sizeof(buffer));
   close(file);
   printf("%s", buffer);
-
-  //printf("\033[0m");
 }
 
-//prints current configuration of board[][]
-// void update_board(){
-//   int y;
-//   int x;
-//   for(y = 0; y < 8; y++){
-//     for(x = 0; x < 8; x++){
-//       gotoBoardXY(x, y);
-//       if(board[y][x] == 'b') printf("\033[1;30m");
-//       //if(board[y][x] == ' ') printf("\033[1;42m");
-
-//       printf("%c", board[y][x]);
-//     }
-//   }
-// }
 
 //checks if (x,y) is in the board
 int inBounds(int x, int y){
@@ -312,6 +297,8 @@ void move(int from_server, int to_server){
   new_settings.c_cc[VTIME] = 0;
 
   tcsetattr(0, TCSANOW, &new_settings);
+
+  create_mem();
 
   int moving = 0;
   while(1){
