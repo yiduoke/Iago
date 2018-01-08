@@ -23,13 +23,13 @@ void create_mem(){
   }
   // gotoBoardXY(0,11);
   // printf("shmem created\n");
-  //
+
   // pointer = (int*)shmat(mem_des,0,0);
   // if (pointer<0){
   //   printf("failed to attach shared memory, error is %s\n", strerror(errno));
   //   exit(0);
   // }
-
+  //
   // *pointer = 'b';
   // if (shmdt(pointer) < 0){
   //   printf("failed to detached shared memory, error is %s\n", strerror(errno));
@@ -48,6 +48,8 @@ int main() {
 
   from_client = server_handshake( &to_client );
   from_client2 = server_handshake2( &to_client2 );
+
+  create_mem();
 
   write(to_client, "33w", 3);
   printf("initiated\n");

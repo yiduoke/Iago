@@ -271,8 +271,6 @@ void move(int from_server, int to_server){
 
   tcsetattr(0, TCSANOW, &new_settings);
 
-  create_mem();
-
   int moving = 0;
   while(1){
     if(!moving){
