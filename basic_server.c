@@ -27,6 +27,7 @@ void create_mem(){
   int* pointer;//(int*)calloc(sizeof(int),1);
   int mem_des;
 
+  printf("KEY: %d\n", KEY);
   mem_des = shmget(KEY, sizeof(int), IPC_CREAT | 0777);
   if (mem_des < 0){
     printf("failed to create shared memory, error is %s\n", strerror(errno));

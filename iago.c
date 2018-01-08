@@ -253,6 +253,31 @@ void hide_legals(){
   }
 }
 
+int* pointer;
+
+void get_mem(){
+  int KEY = ftok("makefile",11);
+  gotoBoardXY(0,11);
+  printf("KEY: %d\n", KEY);
+  int mem_des;
+
+  mem_des = shmget(KEY, sizeof(int), 0777);
+  if (mem_des < 0){
+    printf("failed to create shared memory, error is %s\n", strerror(errno));
+    exit(0);
+  }
+
+  pointer = (int*)shmat(mem_des,NULL,0);
+  printf("just created pointer for attachment\n");
+  if (pointer<0){
+    printf("failed to attach shared memory, error is %s\n", strerror(errno));
+    exit(0);
+  }
+
+  gotoBoardXY(0,11);
+  printf("%c", *pointer);
+}
+
 //handles user inputs
 void move(int from_server, int to_server){
   signal(SIGINT, sighandler);
@@ -270,12 +295,16 @@ void move(int from_server, int to_server){
   new_settings.c_cc[VTIME] = 0;
 
   tcsetattr(0, TCSANOW, &new_settings);
-
+  int first = 0;
   int moving = 0;
   while(1){
     if(!moving){
       char move[3];
       read(from_server, move, 3); //receiving enemy move
+      first++;
+      if(first == 1){
+          get_mem();
+      }
 
       color = 'b';
       if(move[2] == 'b') color = 'w';
