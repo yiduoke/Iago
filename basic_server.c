@@ -10,35 +10,46 @@
 #include <sys/sem.h>
 #include <sys/shm.h>
 #include <errno.h>
+#include <stdlib.h>
+
+static void sighandler(int signo) {
+  int KEY = ftok("makefile", 11);
+  int mem_des = shmget(KEY, sizeof(int), 0777);
+
+  if(shmctl(mem_des, IPC_RMID, 0) < 0){
+    printf("failed to remove shared memory\n");
+  }
+  exit(0);
+}
 
 void create_mem(){
   int KEY = ftok("makefile",11);
-  int* pointer;
+  int* pointer;//(int*)calloc(sizeof(int),1);
   int mem_des;
 
-  mem_des = shmget(KEY, sizeof(int), IPC_CREAT | IPC_EXCL | 0777);
+  mem_des = shmget(KEY, sizeof(int), IPC_CREAT | 0777);
   if (mem_des < 0){
     printf("failed to create shared memory, error is %s\n", strerror(errno));
     exit(0);
   }
-  // gotoBoardXY(0,11);
-  // printf("shmem created\n");
 
-  // pointer = (int*)shmat(mem_des,0,0);
-  // if (pointer<0){
-  //   printf("failed to attach shared memory, error is %s\n", strerror(errno));
-  //   exit(0);
-  // }
-  //
-  // *pointer = 'b';
+  pointer = (int*)shmat(mem_des,NULL,0);
+  printf("just created pointer for attachment\n");
+  if (pointer<0){
+    printf("failed to attach shared memory, error is %s\n", strerror(errno));
+    exit(0);
+  }
+
+  *pointer = 'b';
   // if (shmdt(pointer) < 0){
   //   printf("failed to detached shared memory, error is %s\n", strerror(errno));
   //   exit(0);
   // }
-  // printf("just created: %c in shared memory\n", *pointer);
+  printf("just created: %c in shared memory\n", *pointer);
 }
 
 int main() {
+  signal(SIGINT, sighandler);
 
   int to_client;
   int from_client;
