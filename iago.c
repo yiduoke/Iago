@@ -49,7 +49,14 @@ static void sighandler(int signo) {
   char buffer[20];
   sprintf(buffer, "%d", getpid());
   remove(buffer);
-  exit(1);
+
+  int KEY = ftok("makefile", 11);
+  int mem_des = shmget(KEY, sizeof(int), 0777);
+
+  if(shmctl(mem_des, IPC_RMID, 0) < 0){
+    printf("failed to remove shared memory\n");
+  }
+  exit(0);
 }
 
 // change a piece of on the board
@@ -301,10 +308,6 @@ void move(int from_server, int to_server){
     if(!moving){
       char move[3];
       read(from_server, move, 3); //receiving enemy move
-      first++;
-      if(first == 1){
-          get_mem();
-      }
 
       color = 'b';
       if(move[2] == 'b') color = 'w';
@@ -420,7 +423,7 @@ void move(int from_server, int to_server){
 
 int main(){
   //signal(SIGINT, sighandler);
-
+  get_mem();
   int to_server;
   int from_server;
 
