@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
@@ -49,14 +50,7 @@ static void sighandler(int signo) {
   char buffer[20];
   sprintf(buffer, "%d", getpid());
   remove(buffer);
-
-  int KEY = ftok("makefile", 11);
-  int mem_des = shmget(KEY, sizeof(int), 0777);
-
-  if(shmctl(mem_des, IPC_RMID, 0) < 0){
-    printf("failed to remove shared memory\n");
-  }
-  exit(0);
+  exit(1);
 }
 
 // change a piece of on the board
@@ -69,7 +63,6 @@ void place_piece(int x, int y, char piece){
       enemy_count++;
     }
   }
-  #include <stdio.h>
   else{// the spot is not empty
     if (board[y][x] != piece){ // not a dummy move
       if (board[y][x]==color){// if that spot is gonna be turned over to the enemy
@@ -265,7 +258,7 @@ int* pointer;
 void get_mem(){
   int KEY = ftok("makefile",11);
   gotoBoardXY(0,11);
-  //printf("KEY: %d\n", KEY);
+  printf("KEY: %d\n", KEY);
   int mem_des;
 
   mem_des = shmget(KEY, sizeof(int), 0777);
@@ -275,14 +268,14 @@ void get_mem(){
   }
 
   pointer = (int*)shmat(mem_des,NULL,0);
-  //printf("just created pointer for attachment\n");
+  printf("just created pointer for attachment\n");
   if (pointer<0){
     printf("failed to attach shared memory, error is %s\n", strerror(errno));
     exit(0);
   }
 
-  //gotoBoardXY(0,11);
-  //printf("%c", *pointer);
+  gotoBoardXY(0,11);
+  printf("%c", *pointer);
 }
 
 //handles user inputs
@@ -297,17 +290,28 @@ void move(int from_server, int to_server){
   new_settings = initial_settings;
   new_settings.c_lflag &= ~ICANON;
   new_settings.c_lflag &= ~ECHO;
-  // new_settings.c_lflag &= ~ISIG;
+
   new_settings.c_cc[VMIN] = 0;
   new_settings.c_cc[VTIME] = 0;
 
   tcsetattr(0, TCSANOW, &new_settings);
+
+  // getting color from server just once
+  char color_buffer[1];
+  read(from_server, color_buffer, 1);
+  color = color_buffer[0];
+  printf("my color: %c\n", color);
+
   int first = 0;
   int moving = 0;
   while(1){
     if(!moving){
       char move[3];
       read(from_server, move, 3); //receiving enemy move
+      first++;
+      if(first == 1){
+          get_mem();
+      }
 
       color = 'b';
       if(move[2] == 'b') color = 'w';
@@ -423,7 +427,7 @@ void move(int from_server, int to_server){
 
 int main(){
   //signal(SIGINT, sighandler);
-  get_mem();
+
   int to_server;
   int from_server;
 

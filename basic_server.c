@@ -52,8 +52,6 @@ void create_mem(){
 int main() {
   signal(SIGINT, sighandler);
 
-  create_mem();
-  
   int to_client;
   int from_client;
 
@@ -62,6 +60,11 @@ int main() {
 
   from_client = server_handshake( &to_client );
   from_client2 = server_handshake2( &to_client2 );
+
+  write(to_client, "b", 1);
+  write(to_client2, "w", 1);
+
+  create_mem();
 
   write(to_client, "33w", 3);
   printf("initiated\n");
