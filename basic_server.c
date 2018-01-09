@@ -22,9 +22,10 @@ static void sighandler(int signo) {
   exit(0);
 }
 
+int* pointer;//(int*)calloc(sizeof(int),1);
+
 void create_mem(){
   int KEY = ftok("makefile",11);
-  int* pointer;//(int*)calloc(sizeof(int),1);
   int mem_des;
 
   printf("KEY: %d\n", KEY);
@@ -79,6 +80,7 @@ int main() {
 
       write(to_client2, move, sizeof(move));
       printf("done sending move to client2\n");
+      *pointer = 'w';
     }
     else{
       char move[3];
@@ -87,7 +89,9 @@ int main() {
 
       write(to_client, move, sizeof(move));
       printf("done sending move to client1\n");
+      *pointer = 'b';
     }
+    printf("current turn: %c\n", *pointer);
     turn++;
   }
 }

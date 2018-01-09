@@ -300,7 +300,6 @@ void move(int from_server, int to_server){
   char color_buffer[1];
   read(from_server, color_buffer, 1);
   color = color_buffer[0];
-  printf("my color: %c\n", color);
 
   int first = 0;
   int moving = 0;
