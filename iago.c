@@ -258,7 +258,7 @@ int* pointer;
 void get_mem(){
   int KEY = ftok("makefile",11);
   gotoBoardXY(0,11);
-  printf("KEY: %d\n", KEY);
+  //printf("KEY: %d\n", KEY);
   int mem_des;
 
   mem_des = shmget(KEY, sizeof(int), 0777);
@@ -268,14 +268,14 @@ void get_mem(){
   }
 
   pointer = (int*)shmat(mem_des,NULL,0);
-  printf("just created pointer for attachment\n");
+  //printf("just created pointer for attachment\n");
   if (pointer<0){
     printf("failed to attach shared memory, error is %s\n", strerror(errno));
     exit(0);
   }
 
-  gotoBoardXY(0,11);
-  printf("%c", *pointer);
+  //gotoBoardXY(0,11);
+  //printf("%c", *pointer);
 }
 
 //handles user inputs
