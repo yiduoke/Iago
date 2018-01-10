@@ -264,7 +264,7 @@ void get_mem(){
 
   mem_des = shmget(KEY, sizeof(int), 0777);
   if (mem_des < 0){
-    printf("failed to create shared memory, error is %s\n", strerror(errno));
+    printf("failed to get shared memory, error is %s\n", strerror(errno));
     exit(0);
   }
 
@@ -274,9 +274,6 @@ void get_mem(){
     printf("failed to attach shared memory, error is %s\n", strerror(errno));
     exit(0);
   }
-
-  gotoBoardXY(0,11);
-  printf("%c", *pointer);
 }
 
 //handles user inputs
@@ -309,21 +306,23 @@ void move(int from_server, int to_server){
     other_color = 'b';
   }
 
-  int first = 0;
-  int moving = 0;
+  // int moving = 0;
+  int has_read = 0; // has read enemy move; bc we don't wanna block in every iteration, only wanna read once
+
   while(1){
-    if(*pointer == color){
-      char move[3];
+    char move[3];
+    if(*pointer == color && !has_read){
       read(from_server, move, 3); //receiving enemy move
 
       // color = 'b';
       // if(move[2] == 'b') color = 'w';
 
-      gotoBoardXY(0,9);
-      printf("just got moves\n");
       make_move(move);
       num_legals = 0;
       show_legals();
+
+      has_read = 1;
+    }
 
       if (!num_legals && !strncmp("33", move, 2)){ // received a dummy move bc enemy had no legal moves
         // AND I myself have no legal moves -- terminate the game
@@ -345,23 +344,20 @@ void move(int from_server, int to_server){
           break;
         }
       }
-      moving = 1;
-    }
+      // moving = 1;
 
-    //printf("# of legal moves: %d\n", num_legals);
     // if (moving && !num_legals){// no legal moves
     if (*pointer == color && !num_legals){// no legal moves
-      //printf("your turn will be skipped because there are no legal moves\n");
-      //sleep(2);
-      char move[3];
+      // char move[3];
       // sending a dummy move
       sprintf(move, "%d%d%c", 3, 3, board[3][3]);
       send_move(move, to_server);
       *pointer = other_color;
-      moving = 0;
+      // moving = 0;
+      has_read = 0;
     }
     // else if(moving){ // there are legal moves
-    else if(*pointer == color){ // there are legal moves
+    // else if(*pointer == color){ // there are legal moves
       n = getchar();
       if(n != EOF){
         key = n;
@@ -385,7 +381,7 @@ void move(int from_server, int to_server){
           gotoBoardXY(0,9);
           clearLine();
         }
-        else if(key == ' '){
+        else if(key == ' ' && *pointer == color){
           if(isLegal(current_x, current_y, color)){
             place_piece(current_x, current_y, color);
             conquer_pieces(current_x, current_y, color);
@@ -395,7 +391,8 @@ void move(int from_server, int to_server){
             send_move(string_move(current_x, current_y, color), to_server);
             *pointer = other_color;
 
-            moving = 0;
+            // moving = 0;
+            has_read = 0;
           }
           else{
             gotoBoardXY(0,9);
@@ -403,10 +400,11 @@ void move(int from_server, int to_server){
           }
         }
         else if(key == QUIT){
+          gotoBoardXY(0,9);
           printf("\033[0myou rage quit\n");
           break;
         }
-      }
+      // }
     }
     //printf("\n enemy count: %d\n", enemy_count);
     //printf("\n my count: %d\n", my_count);
