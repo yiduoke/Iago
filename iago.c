@@ -32,7 +32,6 @@ char board[8][8];
 
 // color of player piece
 char color;
-char other_color;
 
 int my_count = 2;
 int enemy_count = 2;
@@ -299,13 +298,6 @@ void move(int from_server, int to_server){
   read(from_server, color_buffer, 1);
   color = color_buffer[0];
 
-  if (color == 'b'){
-    other_color = 'w';
-  }
-  else{
-    other_color = 'b';
-  }
-
   // int moving = 0;
   int has_read = 0; // has read enemy move; bc we don't wanna block in every iteration, only wanna read once
 
@@ -352,7 +344,6 @@ void move(int from_server, int to_server){
       // sending a dummy move
       sprintf(move, "%d%d%c", 3, 3, board[3][3]);
       send_move(move, to_server);
-      *pointer = other_color;
       // moving = 0;
       has_read = 0;
     }
@@ -389,7 +380,6 @@ void move(int from_server, int to_server){
             gotoBoardXY(0,9);
             printf("\033[0mplaced a piece at (%d, %d)\n\033[42m", current_x, current_y);
             send_move(string_move(current_x, current_y, color), to_server);
-            *pointer = other_color;
 
             // moving = 0;
             has_read = 0;

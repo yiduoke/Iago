@@ -28,7 +28,6 @@ void create_mem(){
   int KEY = ftok("makefile",11);
   int mem_des;
 
-  printf("KEY: %d\n", KEY);
   mem_des = shmget(KEY, sizeof(int), IPC_CREAT | 0777);
   if (mem_des < 0){
     printf("failed to create shared memory, error is %s\n", strerror(errno));
@@ -67,11 +66,12 @@ int main() {
   write(to_client, "33w", 3);
   printf("initiated\n");
 
-  int turn = 0;
+  // int turn = 0;
 
   while(1){
-    if(turn % 2 == 0){
-      char move[3];
+    // if(turn % 2 == 0){
+    char move[3];
+    if(*pointer == 'b'){
       read(from_client, move, sizeof(move));
       printf("got move from client1\n");
 
@@ -80,7 +80,7 @@ int main() {
       *pointer = 'w';
     }
     else{
-      char move[3];
+      // char move[3];
       read(from_client2, move, sizeof(move));
       printf("got move from client2\n");
 
@@ -89,6 +89,6 @@ int main() {
       *pointer = 'b';
     }
     printf("current turn: %c\n", *pointer);
-    turn++;
+    // turn++;
   }
 }
