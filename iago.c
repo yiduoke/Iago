@@ -32,6 +32,7 @@ char board[8][8];
 
 // color of player piece
 char color;
+char other_color;
 
 int my_count = 2;
 int enemy_count = 2;
@@ -301,21 +302,25 @@ void move(int from_server, int to_server){
   read(from_server, color_buffer, 1);
   color = color_buffer[0];
 
+  if (color == 'b'){
+    other_color = 'w';
+  }
+  else{
+    other_color = 'b';
+  }
+
   int first = 0;
   int moving = 0;
   while(1){
-    if(!moving){
+    if(*pointer == color){
       char move[3];
       read(from_server, move, 3); //receiving enemy move
-      first++;
-      if(first == 1){
-          get_mem();
-      }
 
-      color = 'b';
-      if(move[2] == 'b') color = 'w';
+      // color = 'b';
+      // if(move[2] == 'b') color = 'w';
 
       gotoBoardXY(0,9);
+      printf("just got moves\n");
       make_move(move);
       num_legals = 0;
       show_legals();
@@ -344,15 +349,19 @@ void move(int from_server, int to_server){
     }
 
     //printf("# of legal moves: %d\n", num_legals);
-    if (moving && !num_legals){// no legal moves
+    // if (moving && !num_legals){// no legal moves
+    if (*pointer == color && !num_legals){// no legal moves
       //printf("your turn will be skipped because there are no legal moves\n");
       //sleep(2);
       char move[3];
+      // sending a dummy move
       sprintf(move, "%d%d%c", 3, 3, board[3][3]);
       send_move(move, to_server);
+      *pointer = other_color;
       moving = 0;
     }
-    else if(moving){ // there are legal moves
+    // else if(moving){ // there are legal moves
+    else if(*pointer == color){ // there are legal moves
       n = getchar();
       if(n != EOF){
         key = n;
@@ -384,6 +393,7 @@ void move(int from_server, int to_server){
             gotoBoardXY(0,9);
             printf("\033[0mplaced a piece at (%d, %d)\n\033[42m", current_x, current_y);
             send_move(string_move(current_x, current_y, color), to_server);
+            *pointer = other_color;
 
             moving = 0;
           }
@@ -429,7 +439,7 @@ int main(){
 
   int to_server;
   int from_server;
-
+  get_mem();
   from_server = client_handshake( &to_server );
 
   clear();

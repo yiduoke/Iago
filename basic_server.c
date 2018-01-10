@@ -36,22 +36,21 @@ void create_mem(){
   }
 
   pointer = (int*)shmat(mem_des,NULL,0);
-  printf("just created pointer for attachment\n");
   if (pointer<0){
     printf("failed to attach shared memory, error is %s\n", strerror(errno));
     exit(0);
   }
 
   *pointer = 'b';
-  // if (shmdt(pointer) < 0){
-  //   printf("failed to detached shared memory, error is %s\n", strerror(errno));
-  //   exit(0);
-  // }
-  printf("just created: %c in shared memory\n", *pointer);
+  if (shmdt(pointer) < 0){
+    printf("failed to detached shared memory, error is %s\n", strerror(errno));
+    exit(0);
+  }
 }
 
 int main() {
   signal(SIGINT, sighandler);
+  create_mem();
 
   int to_client;
   int from_client;
@@ -64,8 +63,6 @@ int main() {
 
   write(to_client, "b", 1);
   write(to_client2, "w", 1);
-
-  create_mem();
 
   write(to_client, "33w", 3);
   printf("initiated\n");
