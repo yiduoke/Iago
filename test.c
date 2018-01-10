@@ -49,27 +49,20 @@
 #include <sys/shm.h>
 #include <errno.h>
 
+#define KEY 24601
+
 int main(){
-  int KEY = ftok("makefile", 2); // creating a key for the .gitignore file
-  int memDes;
-  int* pointer;
+  int f;
+  char *var;
 
-    memDes = shmget(KEY, sizeof(int), IPC_CREAT | 0777);
-    if (memDes < 0 ){//errno
-      printf("failed to create shared memory; %s\n", strerror(errno));
-      exit(0);
-    }
+  int shmd = shmget(KEY, sizeof(char), IPC_CREAT | 0600);
 
-    if ( (pointer = (int*)shmat(memDes, 0, 0)) < 0){
-      printf("failed to attach shared memory; %s\n", strerror(errno));
-      exit(0);
-    }
+  var = shmat(shmd, 0, 0);
 
-    *pointer = 0;
-    if (shmdt(pointer) < 0){
-      printf("failed to detach shared memory; %s\n", strerror(errno));
-      exit(0);
-  }
-  // printf("just created: %c in shared memory\n", *pointer);
-return 0;
+  *var = 'B';
+
+  printf("value of var: %c \n", *var);
+
+  shmdt( var);
+  shmctl(shmd, IPC_RMID, 0);
 }

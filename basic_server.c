@@ -22,35 +22,40 @@ static void sighandler(int signo) {
   exit(0);
 }
 
-int* pointer;//(int*)calloc(sizeof(int),1);
+char *pointer;
 
 void create_mem(){
   int KEY = ftok("makefile",11);
-  int mem_des;
+  int mem_des = shmget(KEY, sizeof(char), IPC_CREAT | 0777);
+  //pointer = (char*)calloc(1, sizeof(char*));
 
-  mem_des = shmget(KEY, sizeof(int), IPC_CREAT | 0777);
   if (mem_des < 0){
     printf("failed to create shared memory, error is %s\n", strerror(errno));
     exit(0);
   }
 
-  pointer = (int*)shmat(mem_des,NULL,0);
+  // pointer = (char*)shmat(mem_des,NULL,0);
+  pointer = shmat(mem_des, 0, 0);
   if (pointer<0){
     printf("failed to attach shared memory, error is %s\n", strerror(errno));
     exit(0);
   }
 
   *pointer = 'b';
-  if (shmdt(pointer) < 0){
-    printf("failed to detached shared memory, error is %s\n", strerror(errno));
-    exit(0);
-  }
+
+  // printf("pointer: %c\n", *pointer);
+
+  // if (shmdt(pointer) < 0){
+  //   printf("failed to detached shared memory, error is %s\n", strerror(errno));
+  //   exit(0);
+  // }
 }
 
 int main() {
   signal(SIGINT, sighandler);
   create_mem();
-
+  // *pointer = 'd';
+  //printf("pointer: %c\n", *pointer);
   int to_client;
   int from_client;
 

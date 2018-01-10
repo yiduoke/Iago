@@ -253,7 +253,7 @@ void hide_legals(){
   }
 }
 
-int* pointer;
+char* pointer;
 
 void get_mem(){
   int KEY = ftok("makefile",11);
@@ -261,13 +261,13 @@ void get_mem(){
   printf("KEY: %d\n", KEY);
   int mem_des;
 
-  mem_des = shmget(KEY, sizeof(int), 0777);
+  mem_des = shmget(KEY, sizeof(char), 0777);
   if (mem_des < 0){
     printf("failed to get shared memory, error is %s\n", strerror(errno));
     exit(0);
   }
 
-  pointer = (int*)shmat(mem_des,NULL,0);
+  pointer = (char*)shmat(mem_des,NULL,0);
   printf("just created pointer for attachment\n");
   if (pointer<0){
     printf("failed to attach shared memory, error is %s\n", strerror(errno));
