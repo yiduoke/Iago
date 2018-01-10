@@ -32,3 +32,6 @@ fixed displaying of current piece counts and win/loss messages
 
 yiduoK -- 2017-12-25 17:15
 signal handling so either player can quit any time
+
+yiduoK -- 2017-1-10 14:02
+taking turns doesn't block anymore; paves way for chatting
