@@ -40,6 +40,7 @@ void create_shmem(){
   *pointer = 'b';
 }
 
+//runs game
 int main() {
   signal(SIGINT, sighandler);
   create_shmem();

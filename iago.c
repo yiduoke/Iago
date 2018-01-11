@@ -1,10 +1,14 @@
 #include "pipe_networking.h"
 
+//clears terminal screen
 #define clear() printf("\033[2J");
+//hides cursor
 #define hide_cursor() printf("\033[?25l");
+//sets cursor's coords to (x,y) in terminal
 #define gotoxy(x,y) printf("\033[%d;%dH", (y+1), (x+1))
-//sets cursor position to the middle of the given (x,y) tile
+//sets cursor position to the middle of the given (x,y) board tile
 #define gotoBoardXY(x,y) gotoxy(4*x+2, 2*y+1)
+//clears the line the cursor is on
 #define clearLine() printf("\033[0m\033[K\033[42m");
 
 #define UP 'A'
@@ -21,34 +25,43 @@ char board[8][8];
 // color of player piece
 char color;
 
+//pieces owned
 int my_count = 2;
 int enemy_count = 2;
 
-struct termios initial_settings,
-  new_settings;
+//needed for getting input
+struct termios initial_settings, new_settings;
 
+//current cursor board coords
 int current_x = 0;
 int current_y = 0;
 
+//how many possible moves you have currently
 int num_legals = 0;
 
+//used for shmem
 char* pointer;
 int mem_des;
 
+//detaches and removes shmem
 void clear_mem(){
   if (shmdt(pointer) < 0){
-    printf("failed to detached shared memory, error is %s\n", strerror(errno));
+    printf("failed to detached shmem, error: %s\n", strerror(errno));
     exit(0);
   }
 
   if(shmctl(mem_des, IPC_RMID, 0) < 0){
-    printf("failed to remove shared memory\n");
+    printf("failed to remove shmem, error: %s\n", strerror(errno));
   }
+}
 
+//deletes all of chat.txt
+void clear_chat(){
   FILE *fp = fopen("chat.txt", "w");
   fclose(fp);
 }
 
+//handles ctrl C rage quits
 static void sighandler(int signo) {
   tcsetattr(0, TCSANOW, &initial_settings);
   printf("\033[0m");
@@ -57,6 +70,7 @@ static void sighandler(int signo) {
   remove(buffer);
 
   clear_mem();
+  clear_chat();
   exit(0);
 }
 
@@ -119,7 +133,6 @@ void print_board(){
   close(file);
   printf("%s", buffer);
 }
-
 
 //checks if (x,y) is in the board
 int inBounds(int x, int y){
@@ -213,12 +226,14 @@ void move_left(){
   }
 }
 
+//converts a move into string format to send over pipes
 char *string_move(int x, int y, char piece){
   char *move = (char *)calloc(3,1);
   sprintf(move, "%d%d%c", x, y, piece);
   return move;
 }
 
+//performs a move based on a string format of a move
 void make_move(char *move){
   int x = move[0] - '0';
   int y = move[1] - '0';
@@ -227,10 +242,12 @@ void make_move(char *move){
   conquer_pieces(x,y,piece);
 }
 
+//sends move string to server
 void send_move(char *move, int to_server){
   write(to_server, move, 3);
 }
 
+//highlights legal moves
 void show_legals(){
   int y;
   int x;
@@ -246,6 +263,7 @@ void show_legals(){
   }
 }
 
+//unhighlights legal moves
 void hide_legals(){
   int y;
   int x;
@@ -260,32 +278,25 @@ void hide_legals(){
   }
 }
 
+//creates and attaches shmem
 void get_mem(){
   int KEY = ftok("makefile",0);
-  gotoBoardXY(0,11);
-  printf("KEY: %d\n", KEY);
 
   mem_des = shmget(KEY, sizeof(char), 0777);
   if (mem_des < 0){
-    printf("failed to get shared memory, error is %s\n", strerror(errno));
+    printf("failed to get shmem, error: %s\n", strerror(errno));
     exit(0);
   }
 
-  pointer = (char*)shmat(mem_des,NULL,0);
-  printf("just created pointer for attachment\n");
+  pointer = (char*)shmat(mem_des, NULL, 0);
   if (pointer<0){
-    printf("failed to attach shared memory, error is %s\n", strerror(errno));
+    printf("failed to attach shmem, error: %s\n", strerror(errno));
     exit(0);
   }
 }
 
-//handles user inputs
-void move(int from_server, int to_server){
-  signal(SIGINT, sighandler);
-  char *input = (char *)calloc(1, 100);//when in doubt, calloc is always the answer
-  int n;
-  unsigned char key;
-
+//sets up input settings
+void set_scanning(){
   tcgetattr(0,&initial_settings);
 
   new_settings = initial_settings;
@@ -296,22 +307,30 @@ void move(int from_server, int to_server){
   new_settings.c_cc[VTIME] = 0;
 
   tcsetattr(0, TCSANOW, &new_settings);
+}
 
-  // getting color from server just once
+void reset_scanning(){
+  tcsetattr(0, TCSANOW, &initial_settings);
+}
+
+//handles user inputs
+void move(int from_server, int to_server){
+  char *input = (char *)calloc(1, 100);//when in doubt, calloc is always the answer
+  int n;
+  unsigned char key;
+  set_scanning();
+
+  // getting color from server at first
   char color_buffer[1];
   read(from_server, color_buffer, 1);
   color = color_buffer[0];
 
-  // int moving = 0;
   int has_read = 0; // has read enemy move; bc we don't wanna block in every iteration, only wanna read once
 
   while(1){
     char move[3];
     if(*pointer == color && !has_read){
       read(from_server, move, 3); //receiving enemy move
-
-      // color = 'b';
-      // if(move[2] == 'b') color = 'w';
 
       make_move(move);
       num_legals = 0;
@@ -340,93 +359,76 @@ void move(int from_server, int to_server){
           break;
         }
       }
-      // moving = 1;
 
-    // if (moving && !num_legals){// no legal moves
     if (*pointer == color && !num_legals){// no legal moves
-      // char move[3];
       // sending a dummy move
       sprintf(move, "%d%d%c", 3, 3, board[3][3]);
       send_move(move, to_server);
-      // moving = 0;
       has_read = 0;
     }
-    // else if(moving){ // there are legal moves
-    // else if(*pointer == color){ // there are legal moves
-      n = getchar();
-      if(n != EOF){
-        key = n;
-        if(key == 'c'){
-          gotoBoardXY(0,11);
-          printf("enter message:\n");
-          gotoBoardXY(0,12);
-          char input[100];
-          tcsetattr(0, TCSANOW, &initial_settings);
-          fgets(input, 100, stdin);
-          printf("input: %s", input);
 
-          FILE *fp = fopen("chat.txt", "a");
-          fprintf(fp, "%s", input);
-          fclose(fp);
+    n = getchar();
+    if(n != EOF){
+      key = n;
+      if(key == 'c'){
+        gotoBoardXY(0,11);
+        printf("enter message:\n");
+        gotoBoardXY(0,12);
+        char input[100];
 
-          tcgetattr(0,&initial_settings);
+        reset_scanning();
+        fgets(input, 100, stdin);
+        printf("input: %s", input);
 
-          new_settings = initial_settings;
-          new_settings.c_lflag &= ~ICANON;
-          new_settings.c_lflag &= ~ECHO;
+        FILE *fp = fopen("chat.txt", "a");
+        fprintf(fp, "%s", input);
+        fclose(fp);
 
-          new_settings.c_cc[VMIN] = 0;
-          new_settings.c_cc[VTIME] = 0;
-
-          tcsetattr(0, TCSANOW, &new_settings);
-
-        }
-        if(key == UP){
-          move_up();
+        set_scanning();
+      }
+      if(key == UP){
+        move_up();
+        gotoBoardXY(0,9);
+        clearLine();
+      }
+      else if(key == DOWN){
+        move_down();
+        gotoBoardXY(0,9);
+        clearLine();
+      }
+      else if(key == RIGHT){
+        move_right();
+        gotoBoardXY(0,9);
+        clearLine();
+      }
+      else if(key == LEFT){
+        move_left();
+        gotoBoardXY(0,9);
+        clearLine();
+      }
+      else if(key == ' ' && *pointer == color){
+        if(isLegal(current_x, current_y, color)){
+          place_piece(current_x, current_y, color);
+          conquer_pieces(current_x, current_y, color);
+          hide_legals();
           gotoBoardXY(0,9);
-          clearLine();
-        }
-        else if(key == DOWN){
-          move_down();
-          gotoBoardXY(0,9);
-          clearLine();
-        }
-        else if(key == RIGHT){
-          move_right();
-          gotoBoardXY(0,9);
-          clearLine();
-        }
-        else if(key == LEFT){
-          move_left();
-          gotoBoardXY(0,9);
-          clearLine();
-        }
-        else if(key == ' ' && *pointer == color){
-          if(isLegal(current_x, current_y, color)){
-            place_piece(current_x, current_y, color);
-            conquer_pieces(current_x, current_y, color);
-            hide_legals();
-            gotoBoardXY(0,9);
-            printf("\033[0mplaced a piece at (%d, %d)\n\033[42m", current_x, current_y);
-            send_move(string_move(current_x, current_y, color), to_server);
+          printf("\033[0mplaced a piece at (%d, %d)\n\033[42m", current_x, current_y);
+          send_move(string_move(current_x, current_y, color), to_server);
 
-            // moving = 0;
-            has_read = 0;
-          }
-          else{
-            gotoBoardXY(0,9);
-            printf("\033[0mcan't place a piece at (%d, %d)\033[42m", current_x, current_y);
-          }
+          // moving = 0;
+          has_read = 0;
         }
-        else if(key == QUIT){
+        else{
           gotoBoardXY(0,9);
-          printf("\033[0myou rage quit\n");
-          break;
+          printf("\033[0mcan't place a piece at (%d, %d)\033[42m", current_x, current_y);
         }
-      // }
+      }
+      else if(key == QUIT){
+        gotoBoardXY(0,9);
+        printf("\033[0myou rage quit\n");
+        break;
+      }
     }
-    //printf("\n enemy count: %d\n", enemy_count);
-    //printf("\n my count: %d\n", my_count);
 
     if ((my_count + enemy_count) == 64){ // game over bc board is full
       if (my_count > enemy_count){
@@ -445,10 +447,11 @@ void move(int from_server, int to_server){
       printf("\033[0mYOU WON!!\n");
       break;
     }
-    //num_legals = 0;
+
     gotoBoardXY(current_x, current_y);
   }
-  tcsetattr(0, TCSANOW, &initial_settings);
+
+  reset_scanning();
 }
 
 int main(){
