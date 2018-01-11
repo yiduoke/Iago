@@ -309,8 +309,18 @@ void set_scanning(){
   tcsetattr(0, TCSANOW, &new_settings);
 }
 
+//resets user input settings
 void reset_scanning(){
   tcsetattr(0, TCSANOW, &initial_settings);
+}
+
+//prints chat
+void print_chat(){
+  gotoBoardXY(10,0);
+  FILE *fp = fopen("chat.txt", "r");
+  char buffer[1024];
+  while(fgets(buffer, sizeof(buffer), fp) != NULL) printf("%s", buffer);
+  fclose(fp);
 }
 
 //handles user inputs
@@ -330,6 +340,7 @@ void move(int from_server, int to_server){
   while(1){
     char move[3];
     if(*pointer == color && !has_read){
+      print_chat();
       read(from_server, move, 3); //receiving enemy move
 
       make_move(move);

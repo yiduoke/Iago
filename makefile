@@ -1,3 +1,5 @@
+all: iago bserver
+
 forking: iago fserver
 
 basic: iago bserver
