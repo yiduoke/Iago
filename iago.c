@@ -56,6 +56,9 @@ void clear_mem(){
   if(shmctl(mem_des, IPC_RMID, 0) < 0){
     printf("failed to remove shared memory\n");
   }
+
+  FILE *fp = fopen("chat.txt", "w");
+  fclose(fp);
 }
 
 static void sighandler(int signo) {
@@ -373,6 +376,10 @@ void move(int from_server, int to_server){
           tcsetattr(0, TCSANOW, &initial_settings);
           fgets(input, 100, stdin);
           printf("input: %s", input);
+
+          FILE *fp = fopen("chat.txt", "a");
+          fprintf(fp, "%s", input);
+          fclose(fp);
 
           tcgetattr(0,&initial_settings);
 
