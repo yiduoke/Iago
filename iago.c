@@ -1,15 +1,3 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/wait.h>
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/sem.h>
-#include <sys/shm.h>
-#include <errno.h>
-#include <termios.h>
 #include "pipe_networking.h"
 
 #define clear() printf("\033[2J");
@@ -273,7 +261,7 @@ void hide_legals(){
 }
 
 void get_mem(){
-  int KEY = ftok("makefile",11);
+  int KEY = ftok("makefile",0);
   gotoBoardXY(0,11);
   printf("KEY: %d\n", KEY);
 

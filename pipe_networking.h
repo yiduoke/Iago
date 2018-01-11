@@ -2,10 +2,15 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <sys/shm.h>
 #include <sys/stat.h>
 #include <string.h>
 #include <errno.h>
+#include <termios.h>
 
 #ifndef NETWORKING_H
 #define NETWORKING_H

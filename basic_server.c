@@ -1,104 +1,84 @@
 #include "pipe_networking.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/wait.h>
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/sem.h>
-#include <sys/shm.h>
-#include <errno.h>
-#include <stdlib.h>
 
-char *pointer;
+//shmem to keep track of whose turn it is
 int mem_des;
+char *pointer;
 
-void clear_mem(){
+//detaches and removes shmem
+void clear_shmem(){
   if (shmdt(pointer) < 0){
-    printf("failed to detached shared memory, error is %s\n", strerror(errno));
+    printf("failed to detached shmem, error: %s\n", strerror(errno));
     exit(0);
   }
 
   if(shmctl(mem_des, IPC_RMID, 0) < 0){
-    printf("failed to remove shared memory\n");
+    printf("failed to remove shmem, error: %s\n", strerror(errno));
   }
 }
 
+//handles ctrl C rage quits
 static void sighandler(int signo) {
-  clear_mem();
+  clear_shmem();
   exit(0);
 }
 
-void create_mem(){
-  int KEY = ftok("makefile",11);
+//creates shmem
+void create_shmem(){
+  int KEY = ftok("makefile",0);
   mem_des = shmget(KEY, sizeof(char), IPC_CREAT | 0777);
-  //pointer = (char*)calloc(1, sizeof(char*));
-
   if (mem_des < 0){
-    printf("failed to create shared memory, error is %s\n", strerror(errno));
+    printf("failed to create shmem, error: %s\n", strerror(errno));
     exit(0);
   }
 
-  // pointer = (char*)shmat(mem_des,NULL,0);
   pointer = shmat(mem_des, 0, 0);
   if (pointer<0){
-    printf("failed to attach shared memory, error is %s\n", strerror(errno));
+    printf("failed to attach shmem, error: %s\n", strerror(errno));
     exit(0);
   }
 
   *pointer = 'b';
-
-  // printf("pointer: %c\n", *pointer);
 }
 
 int main() {
   signal(SIGINT, sighandler);
-  create_mem();
-  // *pointer = 'd';
-  //printf("pointer: %c\n", *pointer);
-  int to_client;
-  int from_client;
+  create_shmem();
 
-  int to_client2;
-  int from_client2;
+  int from_b;
+  int to_b;
+  int from_w;
+  int to_w;
+  char move[3];
 
-  from_client = server_handshake( &to_client );
-  from_client2 = server_handshake2( &to_client2 );
+  from_b = server_handshake(&to_b);
+  from_w = server_handshake2(&to_w);
 
-  write(to_client, "b", 1);
-  write(to_client2, "w", 1);
+  write(to_b, "b", 1);
+  write(to_w, "w", 1);
 
-  write(to_client, "33w", 3);
-  printf("initiated\n");
-
-  // int turn = 0;
+  write(to_b, "33w", 3);
+  printf("game started\n");
 
   while(1){
-    // if(turn % 2 == 0){
-    char move[3];
     if(*pointer == 'b'){
-      read(from_client, move, sizeof(move));
-      printf("got move from client1\n");
+      read(from_b, move, sizeof(move));
+      printf("got move from b\n");
 
-      write(to_client2, move, sizeof(move));
-      printf("done sending move to client2\n");
+      write(to_w, move, sizeof(move));
+      printf("done sending move to w\n");
       *pointer = 'w';
     }
     else{
-      // char move[3];
-      read(from_client2, move, sizeof(move));
-      printf("got move from client2\n");
+      read(from_w, move, sizeof(move));
+      printf("got move from w\n");
 
-      write(to_client, move, sizeof(move));
-      printf("done sending move to client1\n");
+      write(to_b, move, sizeof(move));
+      printf("done sending move to b\n");
       *pointer = 'b';
     }
     printf("current turn: %c\n", *pointer);
-    // turn++;
   }
 
   printf("game finished\n");
-  clear_mem();
+  clear_shmem();
 }
