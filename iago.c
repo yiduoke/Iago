@@ -365,6 +365,27 @@ void move(int from_server, int to_server){
       n = getchar();
       if(n != EOF){
         key = n;
+        if(key == 'c'){
+          gotoBoardXY(0,11);
+          printf("enter message:\n");
+          gotoBoardXY(0,12);
+          char input[100];
+          tcsetattr(0, TCSANOW, &initial_settings);
+          fgets(input, 100, stdin);
+          printf("input: %s", input);
+
+          tcgetattr(0,&initial_settings);
+
+          new_settings = initial_settings;
+          new_settings.c_lflag &= ~ICANON;
+          new_settings.c_lflag &= ~ECHO;
+
+          new_settings.c_cc[VMIN] = 0;
+          new_settings.c_cc[VTIME] = 0;
+
+          tcsetattr(0, TCSANOW, &new_settings);
+
+        }
         if(key == UP){
           move_up();
           gotoBoardXY(0,9);
