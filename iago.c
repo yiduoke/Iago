@@ -44,13 +44,29 @@ int current_y = 0;
 
 int num_legals = 0;
 
+char* pointer;
+int mem_des;
+
+void clear_mem(){
+  if (shmdt(pointer) < 0){
+    printf("failed to detached shared memory, error is %s\n", strerror(errno));
+    exit(0);
+  }
+
+  if(shmctl(mem_des, IPC_RMID, 0) < 0){
+    printf("failed to remove shared memory\n");
+  }
+}
+
 static void sighandler(int signo) {
   tcsetattr(0, TCSANOW, &initial_settings);
   printf("\033[0m");
   char buffer[20];
   sprintf(buffer, "%d", getpid());
   remove(buffer);
-  exit(1);
+
+  clear_mem();
+  exit(0);
 }
 
 // change a piece of on the board
@@ -253,13 +269,10 @@ void hide_legals(){
   }
 }
 
-char* pointer;
-
 void get_mem(){
   int KEY = ftok("makefile",11);
   gotoBoardXY(0,11);
   printf("KEY: %d\n", KEY);
-  int mem_des;
 
   mem_des = shmget(KEY, sizeof(char), 0777);
   if (mem_des < 0){
@@ -423,7 +436,7 @@ void move(int from_server, int to_server){
 }
 
 int main(){
-  //signal(SIGINT, sighandler);
+  signal(SIGINT, sighandler);
 
   int to_server;
   int from_server;
@@ -436,4 +449,6 @@ int main(){
   initialize();
 
   move(from_server, to_server);
+
+  clear_mem();
 }

@@ -12,21 +12,28 @@
 #include <errno.h>
 #include <stdlib.h>
 
-static void sighandler(int signo) {
-  int KEY = ftok("makefile", 11);
-  int mem_des = shmget(KEY, sizeof(int), 0777);
+char *pointer;
+int mem_des;
+
+void clear_mem(){
+  if (shmdt(pointer) < 0){
+    printf("failed to detached shared memory, error is %s\n", strerror(errno));
+    exit(0);
+  }
 
   if(shmctl(mem_des, IPC_RMID, 0) < 0){
     printf("failed to remove shared memory\n");
   }
+}
+
+static void sighandler(int signo) {
+  clear_mem();
   exit(0);
 }
 
-char *pointer;
-
 void create_mem(){
   int KEY = ftok("makefile",11);
-  int mem_des = shmget(KEY, sizeof(char), IPC_CREAT | 0777);
+  mem_des = shmget(KEY, sizeof(char), IPC_CREAT | 0777);
   //pointer = (char*)calloc(1, sizeof(char*));
 
   if (mem_des < 0){
@@ -44,11 +51,6 @@ void create_mem(){
   *pointer = 'b';
 
   // printf("pointer: %c\n", *pointer);
-
-  // if (shmdt(pointer) < 0){
-  //   printf("failed to detached shared memory, error is %s\n", strerror(errno));
-  //   exit(0);
-  // }
 }
 
 int main() {
@@ -96,4 +98,7 @@ int main() {
     printf("current turn: %c\n", *pointer);
     // turn++;
   }
+
+  printf("game finished\n");
+  clear_mem();
 }
