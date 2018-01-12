@@ -42,6 +42,8 @@ int num_legals = 0;
 //used for shmem
 char* pointer;
 int mem_des;
+int chat_size;
+struct stat buffer;
 
 //detaches and removes shmem
 void clear_mem(){
@@ -100,8 +102,8 @@ void place_piece(int x, int y, char piece){
   board[y][x] = piece;
 
   gotoBoardXY(x,y);
-  if(piece == 'b') printf("\033[30m\u2B24");
-  if(piece == 'w') printf("\033[97m\u2B24");
+  if(piece == 'b') printf("\033[30m\033[42m\u2B24");
+  if(piece == 'w') printf("\033[97m\033[42m\u2B24");
 }
 
 //sets board[][] to all spaces, then adds initial pieces
@@ -121,6 +123,9 @@ void initialize(){
 
   my_count = 2;
   enemy_count = 2;
+
+  stat("chat.txt", &buffer);
+  chat_size = 0;
 }
 
 //prints empty board
@@ -316,7 +321,8 @@ void reset_scanning(){
 
 //prints chat
 void print_chat(){
-  gotoBoardXY(10,0);
+  gotoxy(0,23);
+  printf("\033[0m");
   FILE *fp = fopen("chat.txt", "r");
   char buffer[1024];
   while(fgets(buffer, sizeof(buffer), fp) != NULL) printf("%s", buffer);
@@ -338,9 +344,15 @@ void move(int from_server, int to_server){
   int has_read = 0; // has read enemy move; bc we don't wanna block in every iteration, only wanna read once
 
   while(1){
+    stat("chat.txt", &buffer);
+    if(buffer.st_size > chat_size){
+      print_chat();
+      chat_size = buffer.st_size;
+    }
     char move[3];
     if(*pointer == color && !has_read){
-      print_chat();
+      gotoBoardXY(9,1);
+      printf("st_size: %d", buffer.st_size);
       read(from_server, move, 3); //receiving enemy move
 
       make_move(move);
@@ -382,39 +394,45 @@ void move(int from_server, int to_server){
     if(n != EOF){
       key = n;
       if(key == 'c'){
-        gotoBoardXY(0,11);
-        printf("enter message:\n");
-        gotoBoardXY(0,12);
+        gotoBoardXY(0,9);
+        printf("\033[0menter message:\n");
+        gotoBoardXY(0,10);
+        printf("\033[0m");
         char input[100];
 
         reset_scanning();
         fgets(input, 100, stdin);
-        printf("input: %s", input);
+        //printf("input: %s", input);
 
         FILE *fp = fopen("chat.txt", "a");
         fprintf(fp, "%s", input);
         fclose(fp);
 
+        gotoBoardXY(0,9);
+        clearLine();
+        gotoBoardXY(0,10);
+        clearLine();
+
         set_scanning();
       }
       if(key == UP){
         move_up();
-        gotoBoardXY(0,9);
+        gotoBoardXY(9,0);
         clearLine();
       }
       else if(key == DOWN){
         move_down();
-        gotoBoardXY(0,9);
+        gotoBoardXY(9,0);
         clearLine();
       }
       else if(key == RIGHT){
         move_right();
-        gotoBoardXY(0,9);
+        gotoBoardXY(9,0);
         clearLine();
       }
       else if(key == LEFT){
         move_left();
-        gotoBoardXY(0,9);
+        gotoBoardXY(9,0);
         clearLine();
       }
       else if(key == ' ' && *pointer == color){
@@ -422,7 +440,7 @@ void move(int from_server, int to_server){
           place_piece(current_x, current_y, color);
           conquer_pieces(current_x, current_y, color);
           hide_legals();
-          gotoBoardXY(0,9);
+          gotoBoardXY(9,0);
           printf("\033[0mplaced a piece at (%d, %d)\n\033[42m", current_x, current_y);
           send_move(string_move(current_x, current_y, color), to_server);
 
@@ -430,12 +448,12 @@ void move(int from_server, int to_server){
           has_read = 0;
         }
         else{
-          gotoBoardXY(0,9);
+          gotoBoardXY(9,0);
           printf("\033[0mcan't place a piece at (%d, %d)\033[42m", current_x, current_y);
         }
       }
       else if(key == QUIT){
-        gotoBoardXY(0,9);
+        gotoBoardXY(9,0);
         printf("\033[0myou rage quit\n");
         break;
       }
