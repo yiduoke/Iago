@@ -344,7 +344,7 @@ void print_chat(){
   }
   
   lseek(fd, offset, SEEK_SET);
-  chat chat2[1024];
+  chat chat2[1024]
   read(fd, chat2, sizeof(chat2));
   printf("chat: %s"
   
