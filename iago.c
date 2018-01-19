@@ -323,28 +323,28 @@ void reset_scanning(){
 void print_chat(){
   gotoxy(0,20);
   printf("\033[0m");
-  
+
   int lines = 0;
   //char* chat = (char*)calloc(1,1024);
   char chat[1024];
-    
+  char chat2[1024];
+
   int fd = open("chat.txt", O_RDONLY);
+
   int offset = lseek(fd, 0, SEEK_END);
-  lseek(fd, 1, SEEK_SET); 
+  lseek(fd, 1, SEEK_SET);
   read(fd, chat, sizeof(chat));
  // printf("offset: %d\n", offset);
   
   for (lines; lines < 5; lines++){
     while (chat[offset--] != '\n'){
-  	}	
+  	}
   }
   
   lseek(fd, offset-1, SEEK_SET);
   //char* chat2 = (char*)calloc(1,1024);
-  char chat2[1024];
   read(fd, chat2, sizeof(chat2));
   printf("%s", chat2);
-
 }
 
 //handles user inputs
