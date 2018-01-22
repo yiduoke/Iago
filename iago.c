@@ -323,28 +323,44 @@ void reset_scanning(){
 void print_chat(){
   gotoxy(0,20);
   printf("\033[0m");
+  //
+  // int lines = 0;
+  // //char* chat = (char*)calloc(1,1024);
+  // char chat[1024];
+  // char chat2[1024];
+  //
+  // int fd = open("chat.txt", O_RDONLY);
+  // read(fd, chat, sizeof(chat));
+  //
+  // int offset = lseek(fd, 0, SEEK_END);
+  //
+  // for (lines; lines < 5; lines++){
+  //   if (!offset){ //beginning
+  //     break;
+  //   }
+  //   while (chat[offset--] != '\n'){
+  // 	}
+  // }
+  //
+  // lseek(fd, offset, SEEK_SET);
+  // //char* chat2 = (char*)calloc(1,1024);
+  // read(fd, chat2, sizeof(chat2));
+  // printf("%s", chat2);
 
-  int lines = 0;
-  //char* chat = (char*)calloc(1,1024);
-  char chat[1024];
-  char chat2[1024];
+    char lines[6][256];
+    size_t i = 0;
+    FILE *chat = fopen("chat.txt", "r");
 
-  int fd = open("chat.txt", O_RDONLY);
-
-  int offset = lseek(fd, 0, SEEK_END);
-  lseek(fd, 1, SEEK_SET);
-  read(fd, chat, sizeof(chat));
- // printf("offset: %d\n", offset);
-  
-  for (lines; lines < 5; lines++){
-    while (chat[offset--] != '\n'){
-  	}
-  }
-  
-  lseek(fd, offset-1, SEEK_SET);
-  //char* chat2 = (char*)calloc(1,1024);
-  read(fd, chat2, sizeof(chat2));
-  printf("%s", chat2);
+    if (chat != NULL) {
+        while (fgets(lines[i % 6], sizeof(lines[i % 6]), chat)) {
+            i++;
+        }
+        fclose(chat);
+        for (size_t j = i < 5 ? 0 : i - 5; j < i; j++) {
+            // fputs(lines[j % 6], stdout);
+            printf("%s", lines[j % 6]);
+        }
+    }
 }
 
 //handles user inputs
