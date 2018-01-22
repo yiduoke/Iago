@@ -33,8 +33,11 @@ fixed displaying of current piece counts and win/loss messages
 yiduoK -- 2017-12-25 17:15
 signal handling so either player can quit any time
 
-yiduoK -- 2017-1-10 14:02
+yiduoK -- 2018-1-10 14:02
 taking turns doesn't block anymore; paves way for chatting
 
-yiduoK -- 2017-1-21 14:02
+mdA -- 2018-1-11 05:27
+beautified and commented code, user can now write inputs to chat.txt, chat log displays below board
+
+yiduoK -- 2018-1-21 14:02
 only prints last 5 lines of chat, just need to fix positioning of messages being entered
