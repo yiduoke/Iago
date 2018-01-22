@@ -352,22 +352,6 @@ void print_chat(){
   read(fd, chat2, sizeof(chat2));
   chat2[init_offset - offset-2] = 0;
   printf("%s", chat2);
-//
-//   char lines[6][256];
-//   size_t i = 0;
-//   FILE *chat = fopen("chat.txt", "r");
-//
-// // circular array (deque)
-//   if (chat) {
-//       while (fgets(lines[i % 6], sizeof(lines[i % 6]), chat)) {
-//           i++;
-//       }
-//       fclose(chat);
-//
-//       for (size_t j = i < 5 ? 0 : i - 5; j < i; j++) {
-//           printf("%s", lines[j % 6]);
-//       }
-//   }
 }
 
 //handles user inputs
