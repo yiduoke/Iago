@@ -32,7 +32,7 @@ In the other two tabs, run
 $ ./iago
 ```
 
-3. Use arrow keys to navigate the board, and press enter to place a piece. If it's your turn, your legal moves will be highlighted in yellow. Use Alt + <terminal tab #> to switch tabs.
+3. Use arrow keys to navigate the board, and press space to place a piece. If it's your turn, your legal moves will be highlighted in yellow. Use Alt + <terminal tab #> to switch tabs.
 
 4. To chat, press c -- even if it's not your turn! Once you start typing a chat, there's no turning back. You must send or quit.
 
