@@ -4,7 +4,7 @@
 
 ### Description
 
-We made a version of Othello the board game that allows two players to play against each other and chat at the same time.
+We made a version of Othello the board game that allows two players to play against each other and chat at the same time. Our game highlight's each player's legal moves during their turn, uses terminal colors, has an instant chat, and there's no blocking.
 
 ## Required Libraries
 
