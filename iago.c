@@ -335,22 +335,31 @@ void print_chat(){
   int offset = lseek(fd, 0, SEEK_END);
   int init_offset = offset;
 
-  for (lines; lines < 6; lines++){
+  for (lines; lines < 5; lines++){
     while (chat[offset--] != '\n'){
       if (!offset){ //beginning
         break;
       }
     }
     if (!offset){ //beginning
-      offset = -2;
+      offset = -1;
       break;
     }
   }
 
-  lseek(fd, offset+2, SEEK_SET);
+  lseek(fd, offset+1, SEEK_SET);
   //char* chat2 = (char*)calloc(1,1024);
   read(fd, chat2, sizeof(chat2));
-  chat2[init_offset - offset-2] = 0;
+  chat2[init_offset - offset-1] = 0;
+
+  int i = 0;
+  for(; i<5; i++){
+    gotoxy(0, 20+i);
+    clearLine();
+  }
+
+  gotoxy(0,20);
+  printf("\033[0m");
   printf("%s", chat2);
 }
 
@@ -419,9 +428,9 @@ void move(int from_server, int to_server){
     if(n != EOF){
       key = n;
       if(key == 'c'){
-        gotoBoardXY(0,9);
+        gotoBoardXY(9,2);
         printf("\033[0menter message:\n");
-        gotoBoardXY(0,10);
+        gotoBoardXY(9,3);
         printf("\033[0m");
         char input[100];
 
@@ -433,9 +442,9 @@ void move(int from_server, int to_server){
         fprintf(fp, "%s", input);
         fclose(fp);
 
-        gotoBoardXY(0,9);
+        gotoBoardXY(9,2);
         clearLine();
-        gotoBoardXY(0,10);
+        gotoBoardXY(9,3);
         clearLine();
 
         set_scanning();
