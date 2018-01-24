@@ -18,7 +18,7 @@ None
 $ make
 ```
 
-1. Maximize terminal screen (important so graphical errors don't occur), and create 3 tabs with ctrl + Shift + T (do not use tmux because it causes graphical glitches too)
+1. Make sure your terminal window is maxed, and zoom is at its default (important so graphical errors don't occur), and create 3 tabs with ctrl + Shift + T (do not use tmux because it causes graphical glitches too)
 
 2. In one of your terminal tabs, run 
 
