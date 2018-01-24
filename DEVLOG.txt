@@ -33,8 +33,17 @@ fixed displaying of current piece counts and win/loss messages
 yiduoK -- 2017-12-25 17:15
 signal handling so either player can quit any time
 
-yiduoK -- 2017-1-10 14:02
+yiduoK -- 2018-1-10 14:02
 taking turns doesn't block anymore; paves way for chatting
 
-yiduoK -- 2017-1-21 14:02
+mdA -- 2018-1-11 05:09
+shmem removes once game ends/upon rage quit, user can write inputs to chat.txt now, and cleaned up code
+
+mdA -- 2018-1-12 09:09
+instant chat works now, rearranged screen
+
+yiduoK -- 2018-1-21 14:02
 only prints last 5 lines of chat, just need to fix positioning of messages being entered
+
+mdA -- 2018-1-24 15:37
+finished bug testing, updated readme
