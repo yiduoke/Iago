@@ -37,3 +37,17 @@ $ ./iago
 - To chat, press c -- even if it's not your turn! Once you start typing a chat, there's no turning back. You must send or quit.
 
 - To quit, press ctrl + c.
+
+## Class Topics Covered
+
+- Allocating memory: for storing user input, loading files into buffers, etc.
+- Working with files: reading and displaying the board and chat
+- Finding information about files: used stat to determine when chat has been updated
+- Signals: sighandler used to catch rage quits and normal quits, cleans up resources used before quitting
+- Pipes: named pipes for initial server-client connection, unnamed pipes for transferring move data once game starts
+- Shared memory: used to keep track of whose turn it is and let each client know when to start reading for a move from the server
+
+## Known Bugs
+
+- Graphical errors can occur when using terminal settings not specified in instructions
+- On some machines, a small weird character is printed below the board
